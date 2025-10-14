@@ -11,11 +11,12 @@ floating_modifier $mod
 exec --no-startup-id "feh --bg-fill ~/.config/wallpaper.jpg"
 
 exec_always "xrdb -merge $HOME/.Xresources"
-exec_always autotiling
+# exec_always autotiling
 exec picom
 
-bindsym $mod+Return exec "urxvt"
-# bindsym $mod+Return exec i3-sensible-terminal
+# Test for software rendering in the scenario of a VM with unstable drivers (shoutout UTM).
+bindsym $mod+Return exec sh -c 'test "$ENABLE_SOFTWARE_RENDERING" = 1 && LIBGL_ALWAYS_SOFTWARE=1 exec ghostty || exec ghostty'
+# bindsym $mod+Return exec "ghostty"
 
 bindsym $mod+space exec i3-dmenu-desktop --dmenu="dmenu -i -b -fn 'Geist:size=9' -nb '#000000' -nf '#c5c8c6' -sb '#cc6666' -sf '#000000'"
 
@@ -24,12 +25,12 @@ bindsym Mod1+F4 kill
 
 bindsym $mod+h focus left
 bindsym $mod+j focus down
-bindsym $mod+k focus up 
+bindsym $mod+k focus up
 bindsym $mod+l focus right
 
 bindsym $mod+Shift+h move left
 bindsym $mod+Shift+j move down
-bindsym $mod+Shift+k move up 
+bindsym $mod+Shift+k move up
 bindsym $mod+Shift+l move right
 
 bindsym $mod+v split h
@@ -37,7 +38,7 @@ bindsym $mod+s split v
 
 bindsym $mod+f fullscreen toggle
 
-bindsym $mod+Shift+space floating toggle 
+bindsym $mod+Shift+space floating toggle
 
 bindsym $mod+Control+h workspace prev
 bindsym $mod+Control+l workspace next

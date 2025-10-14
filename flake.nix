@@ -16,8 +16,13 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # tex2nix = {
+    #   url = "github:rgri/tex2nix";
+    #   inputs.utils.follows = "nixpkgs";
+    # };
     agenix.url = "github:ryantm/agenix";
-    nixvim-config.url = "github:schrobingus/nixvim-config";
+    # nixvim-config.url = "github:schrobingus/nixvim-config";
+    nixvim-config.url = "path:/Users/brent/Sources/nvim-config";
   };
 
   outputs = { self, nixpkgs, nix-darwin, home-manager, nix-index-database, agenix, nixvim-config, ... } @ inputs: let
@@ -26,7 +31,7 @@
 
     info = system: let
       username = "brent";
-      homeDir = 
+      homeDir =
         if builtins.match ".*-darwin" system != null
           then "/Users/${username}"
         else "/home/${username}";
@@ -38,14 +43,15 @@
       home.packages = [
         pkgs.home-manager
         inputs.nixvim-config.packages.${system}.default
+        # inputs.tex2nix.defaultPackage.${system}
       ];
       home.sessionVariables = {
         EDITOR = "nvim";
       };
       imports = [
         ./nix/home/default.nix
-        (if dotfilesUseStore 
-          then ./nix/home/files-store.nix 
+        (if dotfilesUseStore
+          then ./nix/home/files-store.nix
           else ./nix/home/files.nix)
       ] ++ extraHomeModules;
     };
@@ -98,8 +104,8 @@
         pkgs = pkgs;
         extraSpecialArgs = { inherit self; } // info system;
         modules = [
-          homeManagerConfig { 
-            inherit pkgs system extraHomeModules; 
+          homeManagerConfig {
+            inherit pkgs system extraHomeModules;
             dotfilesUseStore = dotfilesUseStore;
           }
         ];
@@ -166,6 +172,10 @@
           ./nix/nixos/programs/portable-cli.nix
           ./nix/nixos/services/avahi.nix
           ./nix/nixos/services/glances.nix
+          ./nix/nixos/services/spice-qemu.nix
+          ./nix/nixos/interfaces/i3.nix
+          ./nix/nixos/programs/base-gui.nix
+          ./nix/nixos/fonts.nix
         ];
         extraHomeModules = commonHomeModules ++ [
           ./nix/home/nix-index-db.nix

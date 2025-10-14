@@ -28,3 +28,5 @@ keybind = alt+l=goto_split:right
 keybind = alt+j=goto_split:bottom
 keybind = alt+k=goto_split:top
 
+auto-update = off
+

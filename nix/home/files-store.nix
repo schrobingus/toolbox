@@ -9,6 +9,9 @@
 # of the flake. However, this also means that the flake will have to be rebuilt to
 # enact changes made to the dotfiles.
 
+# TODO: honestly consider just doing it manually
+# TODO: annex this into the standard `files.nix` as a boolean toggle
+
 { config, lib, ... }:
 
 let

@@ -1,4 +1,4 @@
-{ lib, pkgs, username, homeDir, dotfilesDir, ... }: 
+{ lib, pkgs, username, homeDir, dotfilesDir, ... }:
 
 {
   home.username = username;
@@ -17,12 +17,7 @@
     uv # gdal
 
     # TeX Packages
-    (texliveSmall.withPackages (ps: with ps; [
-      latexmk # Compiler
-      changepage enumitem
-      titlesec
-      helvetic
-    ]))
+    texliveFull
 
     # Haskell Packages
     haskell.compiler.ghc9102

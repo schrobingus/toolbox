@@ -5,7 +5,8 @@
     colmena deploy-rs morph nixos-rebuild nixos-rebuild-ng
     nix-output-monitor
     luajit luarocks
-    neofetch ripgrep vim wget
+    # neofetch FIXME: what the fuck why does neofetch require ueberzug?!?!?
+    ripgrep vim wget
     p7zip
   ];
 

@@ -5,13 +5,13 @@
     enable = true;
 
     # This is used to initialize the `zshrc`, which often doesn't load due to conflicts.
-    initContent = /* sh */ '' 
-    if [ -e "$HOME/.zprofile" ]; then                  
-      source $HOME/.zprofile         
+    initContent = /* sh */ ''
+    if [ -e "$HOME/.zprofile" ]; then
+      source $HOME/.zprofile
     fi
 
-    if [ -e "$HOME/.profile" ]; then                  
-      source $HOME/.profile         
+    if [ -e "$HOME/.profile" ]; then
+      source $HOME/.profile
     fi
 
     if [ -e "$HOME/.config/zsh/rc.zsh" ]; then
@@ -23,6 +23,12 @@
     if [ -e "$HOME/.config/zsh/extra.zsh" ]; then
       source $HOME/.config/zsh/extra.zsh
     fi
+    '';
+
+    # Disable the Nix `command_not_found_handle`, which takes like 2 whole seconds to run.
+    loginExtra = /* sh */ ''
+    unset -f command_not_found_handler 2>/dev/null
+    unset -f command_not_found_handle 2>/dev/null
     '';
 
     plugins = [

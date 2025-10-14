@@ -9,6 +9,8 @@
 
 # If you are deploying remotely, it is optimal to use `files-store.nix` instead.
 
+# TODO: honestly consider just doing it manually
+
 { config, lib, dotfilesDir, ... }:
 
 let

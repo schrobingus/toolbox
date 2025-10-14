@@ -55,7 +55,6 @@
     description = "Brent";
     extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
-    packages = with pkgs; []; 
   };
   programs.zsh.enable = true;
 
