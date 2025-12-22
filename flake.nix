@@ -35,29 +35,23 @@
         if builtins.match ".*-darwin" system != null
           then "/Users/${username}"
         else "/home/${username}";
-      dotfilesDir = "${homeDir}/Sources/dotfiles";
+      # dotfilesDir = "${homeDir}/Sources/dotfiles";
+      dotfilesDir = self;
     in { inherit username homeDir dotfilesDir; };
 
-    homeManagerConfig = { pkgs, system, extraHomeModules ? [], dotfilesUseStore ? false }: {
-      # TODO: move the nvim stuff into it's own home module for organization
+    homeManagerConfig = { pkgs, system, extraHomeModules ? [], linkDotfilesFromStore ? false }: {
       home.packages = [
         pkgs.home-manager
         inputs.leatherman.packages.${system}.default
-        # inputs.tex2nix.defaultPackage.${system}
       ];
-      home.sessionVariables = {
-        EDITOR = "nvim";
-      };
       imports = [
         ./nix/home/default.nix
-        ./nix/home/files-new.nix # HERE FOR TESTING
-        # (if dotfilesUseStore
-        #  then ./nix/home/files-store.nix
-        #  else ./nix/home/files.nix)
+      ] ++ lib.optionals linkDotfilesFromStore [
+        ./nix/home/files.nix
       ] ++ extraHomeModules;
     };
 
-    mkNixOSConfig = { system, extraHomeModules ? [], extraNixOSModules ? [], dotfilesUseStore ? false }: let
+    mkNixOSConfig = { system, extraHomeModules ? [], extraNixOSModules ? [], linkDotfilesFromStore ? false }: let
       pkgs = import nixpkgs { inherit system; };
     in nixpkgs.lib.nixosSystem {
         system = system;
@@ -72,13 +66,13 @@
             home-manager.useUserPackages = true;
             home-manager.users.brent = homeManagerConfig {
               inherit pkgs system extraHomeModules;
-              dotfilesUseStore = dotfilesUseStore;
+              linkDotfilesFromStore = linkDotfilesFromStore;
             };
           }
         ] ++ extraNixOSModules;
       };
 
-    mkDarwinConfig = { system, extraHomeModules ? [], extraDarwinModules ? [], dotfilesUseStore ? false }: let
+    mkDarwinConfig = { system, extraHomeModules ? [], extraDarwinModules ? [], linkDotfilesFromStore ? false }: let
       pkgs = import nixpkgs { inherit system; };
     in nix-darwin.lib.darwinSystem {
         system = system;
@@ -93,13 +87,13 @@
               home-manager.useUserPackages = true;
               home-manager.users.brent = homeManagerConfig {
                 inherit pkgs system extraHomeModules;
-                dotfilesUseStore = dotfilesUseStore;
+                linkDotfilesFromStore = linkDotfilesFromStore;
               };
             }
           ];
       };
 
-    mkHomeConfig = { system, extraHomeModules ? [], dotfilesUseStore ? false }: let
+    mkHomeConfig = { system, extraHomeModules ? [], linkDotfilesFromStore ? false }: let
       pkgs = import nixpkgs { inherit system; };
     in home-manager.lib.homeManagerConfiguration {
         pkgs = pkgs;
@@ -107,7 +101,7 @@
         modules = [
           homeManagerConfig {
             inherit pkgs system extraHomeModules;
-            dotfilesUseStore = dotfilesUseStore;
+            linkDotfilesFromStore = linkDotfilesFromStore;
           }
         ];
       };
@@ -142,25 +136,6 @@
         extraHomeModules = commonHomeModules;
       };
 
-      thonk = {
-        system = "x86_64-linux";
-        extraNixOSModules = [
-          {
-            networking.hostName = "thonk";
-          }
-          ./nix/nixos/bootloaders/grub-efi.nix
-          ./nix/nixos/hardware-configuration/x131e-chromebook.nix
-          ./nix/nixos/interfaces/i3.nix
-          ./nix/nixos/programs/base-gui.nix
-          ./nix/nixos/fonts.nix
-        ] ++ commonBaseCliModules;
-        extraHomeModules = commonHomeModules ++ [
-          ./nix/home/fonts.nix
-          ./nix/home/xresources.nix
-          ./nix/home/dunst.nix
-        ];
-      };
-
       flakyvm-qemu = {
         system = "aarch64-linux";
         extraNixOSModules = [
@@ -181,26 +156,7 @@
         extraHomeModules = commonHomeModules ++ [
           ./nix/home/nix-index-db.nix
         ];
-        dotfilesUseStore = true;
-      };
-
-      tendollarhaircut = {
-        system = "x86_64-linux";
-        extraNixOSModules = [
-          {
-            networking.hostName = "tendollarhaircut";
-          }
-          ./nix/nixos/bootloaders/grub-efi.nix
-          ./nix/nixos/hardware-configuration/tendollarhaircut.nix
-          ./nix/nixos/interfaces/i3.nix
-          ./nix/nixos/programs/base-gui.nix
-          ./nix/nixos/fonts.nix
-        ] ++ commonBaseCliModules;
-        extraHomeModules = commonHomeModules ++ [
-          ./nix/home/fonts.nix
-          ./nix/home/xresources.nix
-          ./nix/home/dunst.nix
-        ];
+        linkDotfilesFromStore = true;
       };
     };
 
@@ -227,8 +183,8 @@
           system = cfg.system;
           extraNixOSModules = cfg.extraNixOSModules or [];
           extraHomeModules = cfg.extraHomeModules or [];
-          dotfilesUseStore = cfg.dotfilesUseStore or false;
-        });
+          linkDotfilesFromStore = cfg.linkDotfilesFromStore or false;
+      });
 
     darwinConfigurations = lib.genAttrs (builtins.attrNames darwinTargets) (name:
       let cfg = darwinTargets.${name};
@@ -236,16 +192,16 @@
           system = cfg.system;
           extraDarwinModules = cfg.extraDarwinModules or [];
           extraHomeModules = cfg.extraHomeModules or [];
-          dotfilesUseStore = cfg.dotfilesUseStore or false;
-        });
+          linkDotfilesFromStore = cfg.linkDotfilesFromStore or false;
+      });
 
     homeConfigurations = lib.genAttrs (builtins.attrNames nixosTargets ++ builtins.attrNames darwinTargets) (name:
       let cfg = nixosTargets.${name} or darwinTargets.${name};
       in mkHomeConfig {
           system = cfg.system;
           extraHomeModules = cfg.extraHomeModules or [];
-          dotfilesUseStore = cfg.dotfilesUseStore or false;
-        });
+          linkDotfilesFromStore = cfg.linkDotfilesFromStore or false;
+      });
 
   };
 }

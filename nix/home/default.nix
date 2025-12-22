@@ -1,13 +1,15 @@
+
 { lib, pkgs, username, homeDir, dotfilesDir, ... }:
 
 {
   home.username = username;
   home.homeDirectory = lib.mkForce homeDir;
-  home.sessionVariables.DOTDIR = dotfilesDir;
+  home.sessionVariables.DOTDIR = dotfilesDir; # TODO: check if this is problematic with the `self` change.
 
   home.stateVersion = "24.05";
 
   home.packages = with pkgs; [
+    stow
     pfetch
     btop gh speedtest-cli
     devenv nurl
@@ -36,9 +38,11 @@
       macmon
     ]);
 
+  nix.package = pkgs.nix;
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
     max-jobs = 4;
     cores = 4;
   };
 }
+

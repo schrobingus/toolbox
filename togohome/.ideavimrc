@@ -1,8 +1,4 @@
 
-" If you are looking for my full fledged Vim config rather than
-" a minimal declaration that can be used universally on any
-" device, you are likely looking for `schrobingus/nixvim-config`
-
 set nocompatible
 
 let mapleader = " "
@@ -18,7 +14,6 @@ set autoindent
 set expandtab
 set tabstop=2
 set shiftwidth=2
-set mouse=a
 set clipboard=unnamedplus
 
 nnoremap ; :
