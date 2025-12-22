@@ -12,7 +12,7 @@
     btop gh speedtest-cli
     devenv nurl
     bat fd pandoc ripgrep shellcheck tree zoxide
-    czkawka fzf zk
+    czkawka fzf
     typst tinymist
     uv # gdal
 

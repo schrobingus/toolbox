@@ -1,15 +1,21 @@
 { ... }:
 
 {
-  # TODO: figure out how to integrate this with users? or just scrap
+  # TODO: figure out how to integrate this with users?
   programs.git = {
     enable = true;
-    userName = "schrobingus";
-    userEmail = "brent.monning.jr@gmail.com";
-    delta.enable = true;
-    extraConfig = {
+    settings = {
       diff.tool = "nvimdiff";
       merge.tool = "nvimdiff1";
+      user = {
+        name = "schrobingus";
+        email = "brent.monning.jr@gmail.com";
+      };
     };
+  };
+
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
   };
 }

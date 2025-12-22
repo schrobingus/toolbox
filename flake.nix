@@ -21,11 +21,11 @@
     #   inputs.utils.follows = "nixpkgs";
     # };
     agenix.url = "github:ryantm/agenix";
-    # nixvim-config.url = "github:schrobingus/nixvim-config";
-    nixvim-config.url = "path:/Users/brent/Sources/nvim-config";
+    # leatherman.url = "github:schrobingus/leatherman";
+    leatherman.url = "path:/Users/brent/Sources/nvim-config";
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-index-database, agenix, nixvim-config, ... } @ inputs: let
+  outputs = { self, nixpkgs, nix-darwin, home-manager, nix-index-database, agenix, leatherman, ... } @ inputs: let
 
     lib = nixpkgs.lib;
 
@@ -42,7 +42,7 @@
       # TODO: move the nvim stuff into it's own home module for organization
       home.packages = [
         pkgs.home-manager
-        inputs.nixvim-config.packages.${system}.default
+        inputs.leatherman.packages.${system}.default
         # inputs.tex2nix.defaultPackage.${system}
       ];
       home.sessionVariables = {
@@ -50,9 +50,10 @@
       };
       imports = [
         ./nix/home/default.nix
-        (if dotfilesUseStore
-          then ./nix/home/files-store.nix
-          else ./nix/home/files.nix)
+        ./nix/home/files-new.nix # HERE FOR TESTING
+        # (if dotfilesUseStore
+        #  then ./nix/home/files-store.nix
+        #  else ./nix/home/files.nix)
       ] ++ extraHomeModules;
     };
 
