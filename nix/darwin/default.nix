@@ -2,7 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
-    colmena deploy-rs morph nixos-rebuild nixos-rebuild-ng
+    colmena deploy-rs morph 
     nix-output-monitor
     luajit luarocks
     # neofetch FIXME: what the fuck why does neofetch require ueberzug?!?!?

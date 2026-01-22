@@ -18,7 +18,7 @@
     glib gsettings-desktop-schemas
     xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
     mesa mesa-gl-headers libglvnd
-    mesa-demos glxinfo
+    mesa-demos
   ];
 
   programs.dconf.enable = true;

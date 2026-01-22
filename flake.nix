@@ -5,7 +5,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
@@ -16,13 +16,9 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # tex2nix = {
-    #   url = "github:rgri/tex2nix";
-    #   inputs.utils.follows = "nixpkgs";
-    # };
     agenix.url = "github:ryantm/agenix";
-    # leatherman.url = "github:schrobingus/leatherman";
-    leatherman.url = "path:/Users/brent/Sources/nvim-config";
+    leatherman.url = "github:schrobingus/leatherman";
+    # leatherman.url = "path:/Users/brent/Sources/nvim-config";
   };
 
   outputs = { self, nixpkgs, nix-darwin, home-manager, nix-index-database, agenix, leatherman, ... } @ inputs: let
@@ -123,7 +119,7 @@
         extraNixOSModules = [
           {
             networking.hostName = "order";
-            system.stateVersion = "25.05";
+            system.stateVersion = "25.11";
             security.pam.sshAgentAuth.enable = true;
             security.sudo.wheelNeedsPassword = false;
           }
@@ -147,6 +143,7 @@
           ./nix/nixos/programs/base-cli.nix
           ./nix/nixos/programs/portable-cli.nix
           ./nix/nixos/services/avahi.nix
+          ./nix/nixos/services/containers.nix
           ./nix/nixos/services/glances.nix
           ./nix/nixos/services/spice-qemu.nix
           ./nix/nixos/interfaces/i3.nix
@@ -205,3 +202,4 @@
 
   };
 }
+

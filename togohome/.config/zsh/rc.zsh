@@ -33,10 +33,7 @@ if pathHas nix-channel; then
   alias ncui="nix-channel --update -vvvvv && sudo nix-channel --update -vvvvv"
 fi
 
-if pathHas nixos-rebuild-ng; then
-  alias nrs="sudo nixos-rebuild-ng switch"
-  alias nrf="sudo nixos-rebuild-ng switch --flake $DOTDIR"
-elif pathHas nixos-rebuild; then
+if pathHas nixos-rebuild; then
   alias nrs="sudo nixos-rebuild switch"
   alias nrf="sudo nixos-rebuild switch --flake $DOTDIR"
 fi

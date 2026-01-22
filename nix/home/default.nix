@@ -17,6 +17,7 @@
     czkawka fzf
     typst tinymist
     uv # gdal
+    # nixos-rebuild-ng colmena
 
     # TeX Packages
     texliveFull
@@ -38,11 +39,12 @@
       macmon
     ]);
 
-  nix.package = pkgs.nix;
-  nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
-    max-jobs = 4;
-    cores = 4;
-  };
+  # TODO: consider this: https://github.com/NixOS/nix/issues/4653
+  # nix.package = pkgs.nix;
+  # nix.settings = {
+  #   experimental-features = [ "nix-command" "flakes" ];
+  #   max-jobs = 4;
+  #   cores = 4;
+  # };
 }
 
