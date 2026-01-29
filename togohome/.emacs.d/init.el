@@ -32,18 +32,8 @@
 
 ;; Scroll line-by-line, and leave a 6 line long amount of space from the edge.
 (setq scroll-step 1
-      ;; scroll-margin 6 ;; FIXME: This interferes with smooth scrolling, figure out a fix as it gets annoying scrolling for sight every time, especially with Avy.
+      ;; scroll-margin 6 ;; Interferes with smooth scrolling, but centered cursor mode makes this a lot more usable.
       scroll-conservatively 100000)
-
-;; Add a scroll margin only when certain commands are run (generally those with the keyboard).
-;; TODO: NOT READY FOR NORMAL USE, FOR DEBUGGING ONLY
-;; (defun my/debug-next-prev-line (&rest _)
-;;   (message "Ran %s" this-command))
-;; (advice-add 'next-line     :after #'my/debug-next-prev-line)
-;; (advice-add 'previous-line :after #'my/debug-next-prev-line)
-;; (with-eval-after-load 'evil
-;;   (advice-add 'evil-next-line     :after #'my/debug-next-prev-line)
-;;   (advice-add 'evil-previous-line :after #'my/debug-next-prev-line))
 
 ;; Throw all backup files in the trash, or disable entirely.
 (setq backup-directory-alist '((".*" . "~/.Trash")))
@@ -110,10 +100,6 @@
   (load bootstrap-file nil 'nomessage))
 (setq straight-use-package-by-default t)
 
-;; Use Diminish, which has use-package integration.
-(use-package diminish)
-(diminish 'visual-line-mode) ;; Diminish word wrapping from the mode-line.
-
 ;; Enable Evil mode.
 (use-package evil
   :init
@@ -129,7 +115,6 @@
 
 ;; Use the Undo-Tree to implement proper undo and redo for Evil mode.
 (use-package undo-tree
-  :diminish
   :init
   (global-undo-tree-mode 1)
   (setq undo-tree-auto-save-history nil)
@@ -215,21 +200,18 @@
 
 ;; Enable Evil Surround.
 (use-package evil-surround
-  :config
-  (global-evil-surround-mode 1))
+  :config (global-evil-surround-mode 1))
 
 ;; Enable Aggressive Indent Mode, and turn off Electric Indent Mode.
 (use-package aggressive-indent
   :config
-  (add-to-list 'minor-mode-alist '(aggressive-indent-mode " AggInd"))
-  (add-to-list 'minor-mode-alist '(electric-indent-mode " ElcInd"))
+  ;; (add-to-list 'minor-mode-alist '(aggressive-indent-mode " AggInd"))
   (electric-indent-mode 0)
   (global-aggressive-indent-mode 1))
 
 ;; Enable Evil Commentary mode.
 (use-package evil-commentary
-  :config
-  (evil-commentary-mode 1))
+  :config (evil-commentary-mode 1))
 
 ;; Enable Corfu for in-buffer completion.
 (use-package corfu
@@ -287,8 +269,8 @@
 			 '(ns-transparent-titlebar . t)
 			 ;; '(ns-appearance . dark) ;; Not needed, because of Auto Dark.
 			 (cons 'menu-bar-lines (if (eq system-type 'darwin) 1 0))
-			 ;; '(font . "SF Mono:style=medium:size=13")
-			 '(font . "SF Mono:size=13")
+			 ;; '(font . "SF Mono:size=13")
+			 (cons 'font (if (eq system-type 'darwin) "SF Mono:size=13" "GeistMono Nerd Font:size=13"))
 			 '(internal-border-width . 16)
 			 '(left-fringe           . 0)
 			 '(right-fringe          . 0)
@@ -310,13 +292,38 @@
     (kbd "<leader>Z-") #'olivetti-shrink
     (kbd "<leader>Z+") #'olivetti-expand))
 
-;; Force all Boxdraw to SF Mono.
+;; Keep the cursor in the center of the window with a module.
+(use-package centered-cursor-mode
+  :config
+  (setq ccm-ignored-commands '(mouse-drag-region
+                               mouse-set-point
+                               mouse-set-region
+                               widget-button-click
+                               scroll-bar-toolkit-scroll
+                               evil-mouse-drag-region
+			       pixel-scroll-precision
+			       pixel-scroll-start-momentum))
+  (global-centered-cursor-mode))
+
+;; Force all Boxdraw to the used font.
 (setq inhibit-compacting-font-caches t)
-(set-fontset-font t 'unicode "SF Mono" nil 'prepend)
+;; (set-fontset-font t 'unicode "SF Mono" nil 'prepend)
+(set-fontset-font t 'unicode (if (eq system-type 'darwin) "SF Mono" "GeistMono Nerd Font") nil 'prepend)
 (setq bidi-display-reordering nil)
 (setq bidi-paragraph-direction 'left-to-right)
 (setq vterm-term-environment-variable "xterm-256color")
 (setq eat-term-name "xterm-256color")
+
+;; If the buffer name is over 24 characters, truncate in modeline.
+(setq-default mode-line-buffer-identification
+	      `(-24 . ,(propertized-buffer-identification "%b")))
+
+;; Install Minions for better minor mode display in the modeline.
+(use-package minions
+  :custom
+  (minions-mode-line-lighter "...")
+  (minions-mode-line-delimiters '("" . ""))
+  :config (minions-mode 1))
 
 ;; Add the Flexoki Themes, and make functions with my own appearance modifications.
 ;; TODO: Inherit from existing faces rather than defining colors directly.
@@ -363,7 +370,6 @@
 		       (face-background 'default nil t))
   (set-face-foreground 'window-divider-last-pixel
 		       (face-background 'default nil t)))
-
 
 ;; Enable Auto Dark Mode, which will dynamically change light/dark themes.
 (use-package auto-dark
