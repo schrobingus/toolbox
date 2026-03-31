@@ -5,7 +5,8 @@
     enable = true;
 
     taps = [
-      "d12frosted/emacs-plus"
+      # "d12frosted/emacs-plus"
+      "railwaycat/emacsmacport"
     ];
     brews = [
       "cocoapods"
@@ -19,6 +20,7 @@
     ];
     casks = [
       "librewolf"
+      "emacs"
       "ghostty@tip"
       "raycast"
       "rectangle"

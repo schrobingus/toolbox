@@ -4,19 +4,30 @@
 (setq auto-save-default nil) ;; Disable auto save, as it leaves junk files.
 (column-number-mode 1) ;; Show the column number (along with line number).
 (setq dired-kill-when-opening-new-dired-buffer t) ;; Prevent Dired buffers from opening on new directory.
+;; FIXME: dirvish preview is not using eshell/ls for some reason, so the variable below is set
+;; (setq dired-use-ls-dired nil) ;; Don't use the "--dired" option in ls.
 (electric-pair-mode 1) ;; Match delimiters automatically.
+;; (setq eshell-ls-use-in-dired t) ;; Force Dired to use ls from Eshell.
 ;; (global-display-line-numbers-mode 1) ;; Display line numbers on the left-hand side.
 ;; (global-hl-line-mode 1) ;; Highlight line with cursor.
 (global-visual-line-mode 1) ;; Enable word wrapping.
 (setq history-delete-duplicates t) ;; Delete duplicates in command history
 (pixel-scroll-precision-mode 1) ;; Enable smooth scrolling.
 (savehist-mode 1) ;; Save command history.
+(setq vc-follow-symlinks t) ;; Automatically load files with symlinks.
 (xterm-mouse-mode 1) ;; Enable the mouse in the terminal.
+
+;; Tweak some native-comp settings.
+(setq native-comp-async-report-warnings-errors nil)
 
 ;; Define an exit message to prevent accidental exits.
 (add-hook 'kill-emacs-query-functions
           (lambda () (y-or-n-p "Do you really want to exit Emacs? "))
           'append)
+
+;; Set Recentf mode to track the previously opened files.
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
 
 ;; Define functions that emphasizes lines and their numbers in buffer. 
 (defun emphasize-lines ()
@@ -38,6 +49,11 @@
 ;; Throw all backup files in the trash, or disable entirely.
 (setq backup-directory-alist '((".*" . "~/.Trash")))
 ;; (setq make-backup-files nil)
+
+;; Do not use word wrap (visual line mode) in Eshell and EAT.
+(add-hook 'eat-mode-hook (lambda () (visual-line-mode 0)))
+(add-hook 'eat-eshell-mode-hook (lambda () (visual-line-mode 0)))
+(add-hook 'eshell-mode-hook (lambda () (visual-line-mode 0)))
 
 ;; Create aliases for eshell, taken from zsh config.
 (defun eshell-command-exists-p (command)
@@ -76,7 +92,7 @@
   (when (and (eshell-command-exists-p "doas") (not (eshell-command-exists-p "sudo")))
     (eshell/alias "sudo" "doas $@*"))
   ;; generic aliases
-  (eshell/alias "ls" "ls -lH --color=auto $@*")
+  ;; (eshell/alias "ls" "ls -lH --color=auto $@*")
   (eshell/alias "x" "startx $@*")
   (eshell/alias "allah" "sudo $@*"))
 (add-hook 'eshell-mode-hook #'eshell-bingus-aliases)
@@ -164,6 +180,7 @@
   (kbd "<leader>fe") #'eval-buffer
   (kbd "<leader>fs") #'save-buffer
   (kbd "<leader>ff") #'find-file
+  (kbd "<leader>fF") #'recentf
   (kbd "<leader>fl") #'load-file
   (kbd "<leader>fr") #'revert-buffer
   (kbd "<leader>z")  #'text-scale-adjust)
@@ -174,20 +191,35 @@
   (apply orig-fn beg end type ?_ args))
 (advice-add 'evil-delete :around 'bb/evil-delete)
 
-;; Escape from INSERT to NORMAL when pressing `jk`.
-(defun jk-escape ()
-  (interactive)
-  (let ((modified (buffer-modified-p)))
-    (insert "j")
-    (let ((evt (read-event (format ""))))
-      (if (and evt (equal evt ?k))
-	  (progn
-	    (delete-char -1)
-	    (set-buffer-modified-p modified)
-	    (evil-normal-state))
-	(insert evt)))))
-(define-key evil-insert-state-map (kbd "j")  #'jk-escape)
-(define-key evil-replace-state-map (kbd "j") #'jk-escape)
+;; Install Evil Escape to escape from INSERT to NORMAL when pressing `jk`.
+(use-package evil-escape
+  :custom
+  (evil-escape-key-sequence "jk")
+  (evil-escape-delay 0.5)
+  :config
+  (push 'visual evil-escape-excluded-states)
+  (evil-escape-mode 1))
+
+;; OLD: Escape from INSERT to NORMAL when pressing `jk`.
+;; (defun jk-escape ()
+;;   (interactive)
+;;   (let ((modified (buffer-modified-p)))
+;;     ;; FIXME: backspace does not work still
+;;     ;; FIXME: assign to a variable rather than redoing every time
+;;     (define-key evil-insert-state-map  (kbd "j") nil)
+;;     (define-key evil-replace-state-map (kbd "j") nil)
+;;     (execute-kbd-macro (kbd "j"))
+;;     (define-key evil-insert-state-map  (kbd "j") #'jk-escape)
+;;     (define-key evil-replace-state-map (kbd "j") #'jk-escape)
+;;     (let ((evt (read-event (format ""))))
+;;       (if (and evt (equal evt ?k))
+;; 	  (progn
+;; 	    (execute-kbd-macro (kbd "DEL"))
+;; 	    (set-buffer-modified-p modified)
+;; 	    (evil-normal-state))
+;; 	(insert evt)))))
+;; (define-key evil-insert-state-map  (kbd "j") #'jk-escape)
+;; (define-key evil-replace-state-map (kbd "j") #'jk-escape)
 
 ;; Enable Avy. Bindings should be akin to leap.nvim.
 (use-package avy
@@ -206,6 +238,8 @@
 (use-package aggressive-indent
   :config
   ;; (add-to-list 'minor-mode-alist '(aggressive-indent-mode " AggInd"))
+  ;; (add-to-list 'aggressive-indent-excluded-modes 'nix-mode)
+  (add-to-list 'aggressive-indent-protected-commands 'evil-undo)
   (electric-indent-mode 0)
   (global-aggressive-indent-mode 1))
 
@@ -231,7 +265,10 @@
     (define-key corfu-map (kbd "<backtab>") #'corfu-previous)
     (define-key corfu-map (kbd "RET") #'corfu-complete)
     (define-key corfu-map (kbd "<return>") #'corfu-complete))
-  :config (global-corfu-mode 1))
+  :config
+  (setq-local completion-at-point-functions
+	      (list #'eglot-completion-at-point))
+  (global-corfu-mode 1))
 
 ;; Enable Vertico for mini-buffer completion.
 (use-package vertico
@@ -239,6 +276,13 @@
   (vertico-cycle t)
   (completion-in-region-function #'consult-completion-in-region)
   :config (vertico-mode 1))
+(use-package vertico-directory
+  :straight nil
+  :after vertico
+  :bind (:map vertico-map
+	      ("RET"   . vertico-directory-enter)
+	      ("DEL"   . vertico-directory-delete-word)
+	      ("M-DEL" . vertico-directory-delete-char)))
 
 ;; Enable Orderless for more flexible completion.
 (use-package orderless
@@ -246,6 +290,59 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles partial-completion))))
   (completion-pcm-leading-wildcard t))
+
+;; Reference the ls command implemented in Lisp.
+;; (use-package ls-lisp
+;;   :straight nil
+;;   :custom
+;;   (ls-lisp-use-insert-directory-program nil) ;; Use the ls command from Emacs instead of the system.
+;;   (ls-lisp-emulation 'MS-Windows)
+;;   (ls-lisp-ignore-case t)
+;;   (ls-lisp-verbosity nil))
+
+;; Enable Dirvish for a facelifted Dired.
+(use-package dirvish
+  :defer t
+  :init
+  (dirvish-override-dired-mode)
+  ;; (dirvish-peek-mode) ;; Preview in Minibuffer
+  (dirvish-side-follow-mode) ;; Useful to Tree Layout
+  :config
+  (evil-collection-define-key 'normal 'dirvish-mode-map
+    "q" 'dirvish-quit)
+  :custom
+  (dirvish-large-directory-threshold 20000)
+  (dirvish-use-header-line nil)
+  (dirvish-use-mode-line nil)
+  (dirvish-default-layout '(0 0.0 0.5))
+  (dirvish-layout-recipes '((2 0.25 0.0)
+			    (1 0.2 0.35)
+			    (0 0.0 0.5)))
+  :bind (("C-c f" . dirvish) ;; TODO: edit so that it uses evil binds
+	 :map dirvish-mode-map
+	 (";"     . dired-up-directory)
+	 ("?"     . dirvish-dispatch)
+	 ("a"     . dirvish-setup-menu)
+	 ("f"     . dirvish-file-info-menu)
+	 ("o"     . dirvish-quick-access)
+	 ("s"     . dirvish-quicksort)
+	 ("r"     . dirvish-history-jump)
+	 ("l"     . dirvish-ls-switches-menu)
+	 ("v"     . dirvish-vc-menu)
+	 ("*"     . dirvish-mark-menu)
+	 ("y"     . dirvish-yank-menu)
+	 ("N"     . dirvish-narrow)
+	 ("^"     . dirvish-history-last)
+	 ("TAB"   . dirvish-subtree-toggle)
+	 ("<tab>" . dirvish-subtree-toggle)
+	 ("M-f"   . dirvish-history-go-forward)
+	 ("M-b"   . dirvish-history-go-backward)
+	 ("M-e"   . dirvish-emerge-menu)))
+
+;; Enable Agent Shell for LLM integration using Goose.
+(use-package agent-shell
+  :custom (agent-shell-goose-authentication
+	   (agent-shell-make-goose-authentication :openai-api-key ""))) ;; All models are local.
 
 ;; Define a typical list of Org Mode keywords.
 (setq org-todo-keywords '((sequence
@@ -258,7 +355,11 @@
 (use-package adaptive-wrap
   :init
   (setq-default adaptive-wrap-extra-indent 0)
-  (add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode))
+  (defun enable-adaptive-wrap-on-hook ()
+    ;; Eshell and EAT should have it left off.
+    (unless (derived-mode-p 'eshell-mode 'eat-eshell-mode 'eat-mode)
+      (adaptive-wrap-prefix-mode 1)))
+  (add-hook 'visual-line-mode-hook #'enable-adaptive-wrap-on-hook))
 
 ;; Use the Frame module to tweak many stylistic features of Emacs.
 (use-package frame
@@ -292,9 +393,13 @@
     (kbd "<leader>Z-") #'olivetti-shrink
     (kbd "<leader>Z+") #'olivetti-expand))
 
+;; Enable Rainbow Mode to highlight colors in-buffer.
+(use-package rainbow-mode)
+
 ;; Keep the cursor in the center of the window with a module.
 (use-package centered-cursor-mode
   :config
+  ;; TODO: add horizontal scrolling here, it seems to always fuck it up
   (setq ccm-ignored-commands '(mouse-drag-region
                                mouse-set-point
                                mouse-set-region
@@ -303,7 +408,8 @@
                                evil-mouse-drag-region
 			       pixel-scroll-precision
 			       pixel-scroll-start-momentum))
-  (global-centered-cursor-mode))
+  ;; (global-centered-cursor-mode)
+  (evil-define-key 'normal 'global (kbd "<leader>c") #'centered-cursor-mode))
 
 ;; Force all Boxdraw to the used font.
 (setq inhibit-compacting-font-caches t)
@@ -325,6 +431,31 @@
   (minions-mode-line-delimiters '("" . ""))
   :config (minions-mode 1))
 
+;; Enable the Highlight To-Do package.
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode))
+
+;; TODO: implement this. but it'll need some configuration
+;; Swap the header line array and mode line array.
+;; This moves the mode line to the top.
+;; (setq-default header-line-format mode-line-format)
+;; (setq-default mode-line-format nil)
+
+;; Install YASnippet for snippets.
+;; The snippets themselves are in .emacs.d/snippets, which is also in dotfiles.
+(use-package yasnippet
+  :config (yas-global-mode 1))
+
+;; Add the Doom Themes for the future, albeit they are not for regular use yet.
+;; TODO: submit pr to hlissner for doom flexoki theme
+(use-package doom-themes
+  :straight (:local-repo "~/Sources/doom-themes" :type nil)
+  :custom
+  (doom-flexoki-padded-modeline t)
+  (doom-flexoki-light-padded-modeline t))
+(use-package solaire-mode) ;; for testing
+(use-package doom-modeline) ;; also for testing
+
 ;; Add the Flexoki Themes, and make functions with my own appearance modifications.
 ;; TODO: Inherit from existing faces rather than defining colors directly.
 (use-package flexoki-themes
@@ -332,55 +463,54 @@
   (flexoki-themes-use-bold-keywords t)
   (flexoki-themes-use-bold-builtins t)
   (flexoki-themes-use-italic-comments t))
-(defun flexoki-bingus-dark ()
-  (interactive)
-  (load-theme 'flexoki-themes-dark t)
-  (with-eval-after-load 'hl-line
-    (set-face-background 'hl-line "#1c1b1a"))
-  (set-face-attribute 'mode-line nil
-		      :box '(:line-width 4 :color "#232726"))
-  (set-face-attribute 'mode-line-active nil
-		      :box '(:line-width 4 :color "#232726"))
-  (set-face-attribute 'mode-line-inactive nil
-		      :box '(:line-width 4 :color "#232726"))
-  (set-face-foreground 'vertical-border
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider-first-pixel
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider-last-pixel
-		       (face-background 'default nil t)))
-(defun flexoki-bingus-light ()
-  (interactive)
-  (load-theme 'flexoki-themes-light t)
-  (with-eval-after-load 'hl-line
-    (set-face-background 'hl-line "#f2f0e5"))
-  (set-face-attribute 'mode-line nil
-		      :box '(:line-width 4 :color "#e6e4d9"))
-  (set-face-attribute 'mode-line-active nil
-		      :box '(:line-width 4 :color "#e6e4d9"))
-  (set-face-attribute 'mode-line-inactive nil
-		      :box '(:line-width 4 :color "#e6e4d9"))
-  (set-face-foreground 'vertical-border
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider-first-pixel
-		       (face-background 'default nil t))
-  (set-face-foreground 'window-divider-last-pixel
-		       (face-background 'default nil t)))
+;; (defun flexoki-bingus-dark ()
+;;   (interactive)
+;;   (load-theme 'flexoki-themes-dark t)
+;;   (with-eval-after-load 'hl-line
+;;     (set-face-background 'hl-line "#1c1b1a"))
+;;   (set-face-attribute 'mode-line nil
+;; 		      :box '(:line-width 4 :color "#232726"))
+;;   (set-face-attribute 'mode-line-active nil
+;; 		      :box '(:line-width 4 :color "#232726"))
+;;   (set-face-attribute 'mode-line-inactive nil
+;; 		      :box '(:line-width 4 :color "#232726"))
+;;   (set-face-foreground 'vertical-border
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider-first-pixel
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider-last-pixel
+;; 		       (face-background 'default nil t)))
+;; (defun flexoki-bingus-light ()
+;;   (interactive)
+;;   (load-theme 'flexoki-themes-light t)
+;;   (with-eval-after-load 'hl-line
+;;     (set-face-background 'hl-line "#f2f0e5"))
+;;   (set-face-attribute 'mode-line nil
+;; 		      :box '(:line-width 4 :color "#e6e4d9"))
+;;   (set-face-attribute 'mode-line-active nil
+;; 		      :box '(:line-width 4 :color "#e6e4d9"))
+;;   (set-face-attribute 'mode-line-inactive nil
+;; 		      :box '(:line-width 4 :color "#e6e4d9"))
+;;   (set-face-foreground 'vertical-border
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider-first-pixel
+;; 		       (face-background 'default nil t))
+;;   (set-face-foreground 'window-divider-last-pixel
+;; 		       (face-background 'default nil t)))
 
 ;; Enable Auto Dark Mode, which will dynamically change light/dark themes.
 (use-package auto-dark
   :after flexoki-themes
   :custom (auto-dark-allow-osascript t)
   :hook
-  ;; FIXME: why doesn't it call the function directly?
-  ;; (auto-dark-dark-mode  . flexoki-bingus-dark)
-  ;; (auto-dark-light-mode . flexoki-bingus-light)
-  (auto-dark-dark-mode  . (lambda () (flexoki-bingus-dark)))
-  (auto-dark-light-mode . (lambda () (flexoki-bingus-light)))
+  ;; (auto-dark-dark-mode  . (lambda () (flexoki-bingus-dark)))
+  ;; (auto-dark-light-mode . (lambda () (flexoki-bingus-light)))
+  (auto-dark-dark-mode  . (lambda () (load-theme 'doom-flexoki t)))
+  (auto-dark-light-mode . (lambda () (load-theme 'doom-flexoki-light t)))
   :config (auto-dark-mode 1))
 
 ;; Change the "DONE" faces for Org, as their contrast is too low by default.
@@ -395,8 +525,8 @@
 (window-divider-mode 1)
 
 ;; Enable Frames-only mode in Emacs, which only uses frames (or OS windows) to view buffers.
-(use-package frames-only-mode
-  :config (frames-only-mode 1))
+;; (use-package frames-only-mode
+;;   :config (frames-only-mode 1))
 
 ;; Enable the EAT terminal, and hook it to eshell.
 (straight-use-package
@@ -408,6 +538,7 @@
                ("terminfo/65" "terminfo/65/*")
                ("integration" "integration/*")
                (:exclude ".dir-locals.el" "*-tests.el"))))
+;; DONE: make it so that EAT will not freak out with the JK bindings
 (use-package eat
   :defer t
   :init (add-hook 'eshell-mode-hook #'eat-eshell-mode))
@@ -416,11 +547,17 @@
 (use-package vterm
   :defer t)
 
+;; Enable Magit.
+;; (eval-after-load "transient" '(debug))
+;; (use-package transient) ;; Updated dependency.
+;; (use-package magit
+;;   :after transient)
+
 ;; Install PDF Tools, and enable Image Roll for it.
-(straight-use-package
- '(pdf-tools :type git :host github :repo "dalanicolai/pdf-tools" :branch "pdf-roll"))
-(straight-use-package
- '(image-roll :type git :host github :repo "dalanicolai/image-roll.el"))
+;; (straight-use-package
+;;  '(pdf-tools :type git :host github :repo "dalanicolai/pdf-tools" :branch "pdf-roll"))
+;; (straight-use-package
+;;  '(image-roll :type git :host github :repo "dalanicolai/image-roll.el"))
 (use-package pdf-tools
   :defer t
   :mode ("\\.pdf\\'" . pdf-view-mode)
@@ -436,65 +573,68 @@
     (kbd "k") #'pdf-view-previous-line-or-previous-page
     (kbd "C-j") #'pdf-view-next-page-command
     (kbd "C-k") #'pdf-view-previous-page-command
-    (kbd "M-r") #'pdf-view-roll-minor-mode
+    ;; (kbd "M-r") #'pdf-view-roll-minor-mode
     (kbd "gg") #'pdf-view-first-page
     (kbd "G")  #'pdf-view-last-page)
   (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
 	TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
 	TeX-source-correlate-start-server t)
   (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer))
-(use-package image-roll
-  :after pdf-tools)
+;; (use-package image-roll
+;;   :after pdf-tools)
 (add-hook 'LaTeX-mode-hook 'pdf-tools-install t) ;; PDF tools should be called immediately upon using AUCTeX.
+
+;; Disable Electric Pairing on AUCTeX buffers.
+(add-hook 'LaTeX-mode-hook (lambda () (electric-pair-local-mode -1)))
 
 ;; Enable Markdown mode.
 (use-package markdown-mode
   :defer t
   :mode ("\\.md\\'" . markdown-mode))
 
-;; Reduce AUCTeX "fontify" presence, and adapt LaTeX faces to Flexoki.
+;; Reduce AUCTeX "fontify" presence.
 (setq font-latex-fontify-script nil)
 (setq font-latex-fontify-sectioning 'color)
-(defun adapt-font-lock-faces-for-latex ()
-  ;; Font-lock faces.
-  (face-remap-add-relative 'font-lock-type-face
-			   '(:inherit flexoki-themes-purple :underline t))
-  (face-remap-add-relative 'font-lock-warning-face
-			   '(:inherit flexoki-themes-purple :underline t))
-  (face-remap-add-relative 'font-lock-keyword-face 'flexoki-themes-blue)
-  (face-remap-add-relative 'font-lock-function-call-face 'flexoki-themes-cyan)
-  (face-remap-add-relative 'font-lock-function-name-face 'flexoki-themes-cyan)
-  (face-remap-add-relative 'font-lock-property-name-face 'flexoki-themes-purple)
-  (face-remap-add-relative 'font-lock-property-use-face 'flexoki-themes-purple)
-  (face-remap-add-relative 'font-lock-variable-name-face 'flexoki-themes-purple)
-  (face-remap-add-relative 'font-lock-variable-use-face 'flexoki-themes-purple)
-  ;; AUCTeX faces.
-  (face-remap-add-relative 'font-latex-bold-face
-			   '(:inherit flexoki-themes-fg :weight bold))
-  (face-remap-add-relative 'font-latex-italic-face
-			   '(:inherit flexoki-themes-fg :slant 'italic))
-  (face-remap-add-relative 'font-latex-underline-face
-			   '(:inherit flexoki-themes-fg :underline t))
-  (face-remap-add-relative 'font-latex-slide-title-face
-			   '(:inherit flexoki-themes-purple :underline t))
-  (face-remap-add-relative 'font-latex-warning-face
-			   'flexoki-themes-cyan)
-  (face-remap-add-relative 'font-latex-doctex-preprocessor-face
-			   '(:inherit font-latex-doctex-documentation-face :weight bold))
-  (face-remap-add-relative 'font-latex-math-face
-			   '(:inherit flexoki-themes-fg :slant italic))
-  (face-remap-add-relative 'font-latex-script-char-face
-			   '(:inherit font-lock-comment-face :weight bold))
-  (face-remap-add-relative 'font-latex-string-face
-			   '(:inherit flexoki-themes-highlight :weight bold))
-  (face-remap-add-relative 'font-latex-verbatim-face 'flexoki-themes-highlight)
-  (face-remap-add-relative 'font-latex-sectioning-0-face 'outline-1)
-  (face-remap-add-relative 'font-latex-sectioning-1-face 'outline-2)
-  (face-remap-add-relative 'font-latex-sectioning-2-face 'outline-3)
-  (face-remap-add-relative 'font-latex-sectioning-3-face 'outline-4)
-  (face-remap-add-relative 'font-latex-sectioning-4-face 'outline-5)
-  (face-remap-add-relative 'font-latex-sectioning-5-face 'outline-6))
-(add-hook 'LaTeX-mode-hook 'adapt-font-lock-faces-for-latex t)
+;; (defun adapt-font-lock-faces-for-latex ()
+;;   ;; Font-lock faces.
+;;   (face-remap-add-relative 'font-lock-type-face
+;; 			   '(:inherit flexoki-themes-purple :underline t))
+;;   (face-remap-add-relative 'font-lock-warning-face
+;; 			   '(:inherit flexoki-themes-purple :underline t))
+;;   (face-remap-add-relative 'font-lock-keyword-face 'flexoki-themes-blue)
+;;   (face-remap-add-relative 'font-lock-function-call-face 'flexoki-themes-cyan)
+;;   (face-remap-add-relative 'font-lock-function-name-face 'flexoki-themes-cyan)
+;;   (face-remap-add-relative 'font-lock-property-name-face 'flexoki-themes-purple)
+;;   (face-remap-add-relative 'font-lock-property-use-face 'flexoki-themes-purple)
+;;   (face-remap-add-relative 'font-lock-variable-name-face 'flexoki-themes-purple)
+;;   (face-remap-add-relative 'font-lock-variable-use-face 'flexoki-themes-purple)
+;;   ;; AUCTeX faces.
+;;   (face-remap-add-relative 'font-latex-bold-face
+;; 			   '(:inherit flexoki-themes-fg :weight bold))
+;;   (face-remap-add-relative 'font-latex-italic-face
+;; 			   '(:inherit flexoki-themes-fg :slant 'italic))
+;;   (face-remap-add-relative 'font-latex-underline-face
+;; 			   '(:inherit flexoki-themes-fg :underline t))
+;;   (face-remap-add-relative 'font-latex-slide-title-face
+;; 			   '(:inherit flexoki-themes-purple :underline t))
+;;   (face-remap-add-relative 'font-latex-warning-face
+;; 			   'flexoki-themes-cyan)
+;;   (face-remap-add-relative 'font-latex-doctex-preprocessor-face
+;; 			   '(:inherit font-latex-doctex-documentation-face :weight bold))
+;;   (face-remap-add-relative 'font-latex-math-face
+;; 			   '(:inherit flexoki-themes-fg :slant italic))
+;;   (face-remap-add-relative 'font-latex-script-char-face
+;; 			   '(:inherit font-lock-comment-face :weight bold))
+;;   (face-remap-add-relative 'font-latex-string-face
+;; 			   '(:inherit flexoki-themes-highlight :weight bold))
+;;   (face-remap-add-relative 'font-latex-verbatim-face 'flexoki-themes-highlight)
+;;   (face-remap-add-relative 'font-latex-sectioning-0-face 'outline-1)
+;;   (face-remap-add-relative 'font-latex-sectioning-1-face 'outline-2)
+;;   (face-remap-add-relative 'font-latex-sectioning-2-face 'outline-3)
+;;   (face-remap-add-relative 'font-latex-sectioning-3-face 'outline-4)
+;;   (face-remap-add-relative 'font-latex-sectioning-4-face 'outline-5)
+;;   (face-remap-add-relative 'font-latex-sectioning-5-face 'outline-6))
+;; (add-hook 'LaTeX-mode-hook 'adapt-font-lock-faces-for-latex t)
 
 ;; Integrate latexmk with AUCTeX.
 (use-package auctex-latexmk
@@ -518,6 +658,36 @@
   (web-mode-markup-indent-offset 2)
   (web-mode-css-indent-offset 2)
   (web-mode-code-indent-offset 2))
+
+;; TODO: profile the python stack. it is WAY TOO SLOW
+;; for example, with these enabled, run auctex. then open a python file on that buffer
+
+;; Install Pet for hooking into Python Virtualenv and UV environments.
+(use-package pet
+  :defer t
+  :custom (pet-find-file-functions
+	   '(pet-find-file-from-project-root
+             pet-locate-dominating-file))
+  :init
+  (add-hook 'python-base-mode-hook 'pet-mode -10)
+  (add-hook 'python-mode-hook
+	    (lambda ()
+	      (setq-local python-shell-interpreter (pet-executable-find "python")
+			  python-shell-virtualenv-root (pet-virtualenv-root))
+	      (setenv "VIRTUAL_ENV" (pet-virtualenv-root)) ;; TODO: make this buffer local, or make a reload function
+	      (pet-eglot-setup))))
+;; (pet-flycheck-setup))))
+
+;; Hook up Eglot to LSP servers.
+(add-to-list 'exec-path "/Users/brent/.local/bin") ;; For ty. TODO: remove when PATH is fixed
+(use-package eglot
+  :straight nil
+  :init (add-hook 'python-mode-hook 'eglot-ensure)
+  :config
+  (set-face-attribute 'eglot-inlay-hint-face nil :height 'unspecified)
+  (add-to-list 'eglot-server-programs
+	       ;; '(python-base-mode . ("pyright-langserver" "--stdio"))))
+	       '(python-base-mode . ("ty" "server"))))
 
 ;; TODO: inspect treesitter to replace most (but not all) major modes
 ;; TODO: also consider making a snippet for major modes use-package when you start implementing those

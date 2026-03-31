@@ -1,4 +1,6 @@
 
+# TODO: DOTDIR IS ABSOLUTELY FUCKED FIX IT (this also applies to eshell)
+
 # zmodload zsh/zprof
 
 # Below disables case sensitivity.

@@ -21,6 +21,7 @@
 
     # TeX Packages
     texliveFull
+    ghostscript
 
     # Haskell Packages
     haskell.compiler.ghc9102
