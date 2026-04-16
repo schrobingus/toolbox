@@ -6,7 +6,7 @@
 
     taps = [
       # "d12frosted/emacs-plus"
-      "railwaycat/emacsmacport"
+      # "railwaycat/emacsmacport"
     ];
     brews = [
       "cocoapods"
@@ -19,8 +19,8 @@
       "wireguard-tools"
     ];
     casks = [
-      "librewolf"
-      "emacs"
+      "librewolf" # NOTE: librewolf is deprecated as a cask, since they don't sign. homebrew is big mad about this, either create a tap or migrate to darwin
+      # "emacs" # TODO: update to match the current emacs installation
       "ghostty@tip"
       "raycast"
       "rectangle"

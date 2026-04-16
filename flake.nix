@@ -119,7 +119,6 @@
         extraNixOSModules = [
           {
             networking.hostName = "order";
-            system.stateVersion = "25.11";
             security.pam.sshAgentAuth.enable = true;
             security.sudo.wheelNeedsPassword = false;
           }

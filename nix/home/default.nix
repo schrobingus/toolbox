@@ -6,7 +6,7 @@
   home.homeDirectory = lib.mkForce homeDir;
   home.sessionVariables.DOTDIR = dotfilesDir; # TODO: check if this is problematic with the `self` change.
 
-  home.stateVersion = "24.05";
+  home.stateVersion = "25.11";
 
   home.packages = with pkgs; [
     stow
@@ -16,7 +16,8 @@
     bat fd pandoc ripgrep shellcheck tree zoxide
     czkawka fzf
     typst tinymist
-    uv # gdal
+    uv # gdal # Install ty from `uv tool`.
+    jdt-language-server
     # nixos-rebuild-ng colmena
 
     # TeX Packages

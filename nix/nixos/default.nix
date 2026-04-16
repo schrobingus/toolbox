@@ -65,4 +65,6 @@
 
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [ 80 443 9090 61208 ];
+
+  system.stateVersion = "25.11";
 }
