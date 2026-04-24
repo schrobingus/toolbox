@@ -13,11 +13,8 @@
     pfetch
     btop gh speedtest-cli
     devenv nurl
-    bat fd pandoc ripgrep shellcheck tree zoxide
-    czkawka fzf
-    typst tinymist
+    bat fd pandoc ripgrep shellcheck tree zoxide fzf
     uv # gdal # Install ty from `uv tool`.
-    jdt-language-server
     # nixos-rebuild-ng colmena
 
     # TeX Packages

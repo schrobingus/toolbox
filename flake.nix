@@ -110,7 +110,6 @@
 
     commonBaseCliModules = [
       ./nix/nixos/programs/base-cli.nix
-      ./nix/nixos/programs/portable-cli.nix
     ];
 
     nixosTargets = {
@@ -131,6 +130,25 @@
         extraHomeModules = commonHomeModules;
       };
 
+      thonktuah = {
+        system = "x86_64-linux";
+        extraNixOSModules = [
+          {
+            networking.hostName = "thonktuah";
+            services.xserver.xkb.options = "ctrl:swapcaps";
+          }
+          ./nix/nixos/bootloaders/grub-efi.nix
+          ./nix/nixos/hardware-configuration/e14-gen2.nix
+          ./nix/nixos/interfaces/gnome.nix
+          ./nix/nixos/programs/base-gui.nix
+          ./nix/nixos/programs/devutils.nix
+          ./nix/nixos/services/avahi.nix
+          ./nix/nixos/fonts.nix
+        ] ++ commonBaseCliModules;
+        extraHomeModules = commonHomeModules;
+        linkDotfilesFromStore = false;
+      };
+
       flakyvm-qemu = {
         system = "aarch64-linux";
         extraNixOSModules = [
@@ -140,7 +158,6 @@
           ./nix/nixos/bootloaders/systemd-boot-efi.nix
           ./nix/nixos/hardware-configuration/qemu.nix
           ./nix/nixos/programs/base-cli.nix
-          ./nix/nixos/programs/portable-cli.nix
           ./nix/nixos/services/avahi.nix
           ./nix/nixos/services/containers.nix
           ./nix/nixos/services/glances.nix
@@ -149,9 +166,7 @@
           ./nix/nixos/programs/base-gui.nix
           ./nix/nixos/fonts.nix
         ];
-        extraHomeModules = commonHomeModules ++ [
-          ./nix/home/nix-index-db.nix
-        ];
+        extraHomeModules = commonHomeModules;
         linkDotfilesFromStore = true;
       };
     };

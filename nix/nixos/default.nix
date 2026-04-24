@@ -8,7 +8,7 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  networking.wireless.enable = false;
+  # networking.wireless.enable = false;
   networking.networkmanager.enable = true;
 
   time.timeZone = "America/Los_Angeles";

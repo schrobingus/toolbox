@@ -13,5 +13,6 @@
     cantarell-fonts
     liberation_ttf
     symbola
+    corefonts # proprietary microsoft fonts
   ];
 }
