@@ -3,21 +3,32 @@
 set $mod Mod4
 
 font pango:Geist 9
-# font pango:Cozette 9
-# font pango:Ionicons 9, Poppins Regular 9
 
 floating_modifier $mod
 
-exec --no-startup-id "feh --bg-fill $HOME/.config/wallpaper.jpg"
+output * bg "$HOME/.config/wallpaper.jpg" fill
 
-exec_always "xrdb -merge $HOME/.Xresources"
+## COMMENT OUT IF NOT ON THINKPAD!!!
+# Remap Caps Lock to Control.
+input "type:keyboard" {
+  xkb_options ctrl:nocaps
+}
+# Configure the acceleration of the TrackPoint.
+input "type:pointer" {
+  accel_profile "flat"
+  pointer_accel 0.7
+}
+# Disable laptop trackpad.
+input "type:touchpad" {
+  events disabled
+}
+
 # exec_always autotiling
-exec picom
 
 # bindsym $mod+Return exec sh -c 'test "$ENABLE_SOFTWARE_RENDERING" = 1 && LIBGL_ALWAYS_SOFTWARE=1 exec ghostty || exec ghostty'
-bindsym $mod+Return exec "urxvt"
+bindsym $mod+Return exec "foot"
 
-bindsym $mod+space exec i3-dmenu-desktop --dmenu="dmenu -i -b -fn 'Geist:size=9' -nb '#000000' -nf '#cecdc3' -sb '#af3029' -sf '#000000'"
+bindsym $mod+space exec "bemenu-run -i -b --fn 'Geist 9' -H 24 --hp 4 --tb '#000000' --tf '#cecdc3' --fb '#000000' --ff '#cecdc3' --hb '#af3029' --hf '#000000' --sb '#af3029' --sf '#000000'"
 
 bindsym $mod+c kill
 bindsym Mod1+F4 kill
@@ -55,9 +66,9 @@ bindsym $mod+Shift+4 move container to workspace 4
 bindsym $mod+Shift+5 move container to workspace 5
 bindsym $mod+Shift+6 move container to workspace 6
 
-bindsym $mod+BackSpace exec "i3-msg restart"
+bindsym $mod+BackSpace reload
 
-bindsym $mod+q exec "i3-nagbar -t warning -m 'Really, exit?' -b 'Yes' 'i3-msg exit'"
+bindsym $mod+q exec "swaynag -t warning -m 'Really, exit?' -b 'Yes' 'swaymsg exit'"
 
 mode "resize" {
     bindsym h resize shrink width 5 px or 5 ppt
@@ -72,7 +83,7 @@ bar {
     status_command exec /home/brent/.config/i3/status.sh
     position top
     workspace_min_width 24
-    padding 2px 8px 2px 8px
+    status_padding 2
     strip_workspace_numbers yes
 
     colors {
@@ -100,3 +111,6 @@ hide_edge_borders smart
 # gaps inner 16
 gaps inner 0
 smart_gaps on
+
+include /etc/sway/config.d/*
+

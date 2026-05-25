@@ -52,6 +52,7 @@
   ;; nix-channel
   (when (eshell-command-exists-p "nix-channel")
     (eshell/alias "ncu" "nix-channel --update $@* && sudo nix-channel --update $@*")
+
     (eshell/alias "ncui" "nix-channel --update -vvvvv $@* && sudo nix-channel --update -vvvvv $@*"))
   ;; nixos-rebuild
   (when (eshell-command-exists-p "nixos-rebuild")
@@ -325,6 +326,13 @@
   (minions-mode-line-delimiters '("" . ""))
   :config (minions-mode 1))
 
+;; Install Rainbow Mode to display colors in buffers.
+(use-package rainbow-mode
+  :init (add-hook 'prog-mode-hook #'rainbow-mode))
+
+;; Load my local clone of the Doom Themes.
+;; TODO: scp from the macbook
+
 ;; Add the Flexoki Themes, and make functions with my own appearance modifications.
 ;; TODO: Inherit from existing faces rather than defining colors directly.
 (use-package flexoki-themes
@@ -372,16 +380,17 @@
 		       (face-background 'default nil t)))
 
 ;; Enable Auto Dark Mode, which will dynamically change light/dark themes.
-(use-package auto-dark
-  :after flexoki-themes
-  :custom (auto-dark-allow-osascript t)
-  :hook
-  ;; FIXME: why doesn't it call the function directly?
-  ;; (auto-dark-dark-mode  . flexoki-bingus-dark)
-  ;; (auto-dark-light-mode . flexoki-bingus-light)
-  (auto-dark-dark-mode  . (lambda () (flexoki-bingus-dark)))
-  (auto-dark-light-mode . (lambda () (flexoki-bingus-light)))
-  :config (auto-dark-mode 1))
+;; (use-package auto-dark
+;;   :after flexoki-themes
+;;   :custom (auto-dark-allow-osascript t)
+;;   :hook
+;;   ;; FIXME: why doesn't it call the function directly?
+;;   ;; (auto-dark-dark-mode  . flexoki-bingus-dark)
+;;   ;; (auto-dark-light-mode . flexoki-bingus-light)
+;;   (auto-dark-dark-mode  . (lambda () (flexoki-bingus-dark)))
+;;   (auto-dark-light-mode . (lambda () (flexoki-bingus-light)))
+;;   :config (auto-dark-mode 1))
+(flexoki-bingus-dark)
 
 ;; Change the "DONE" faces for Org, as their contrast is too low by default.
 (with-eval-after-load 'org-faces

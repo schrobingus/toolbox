@@ -3,7 +3,7 @@
 {
   services = {
     displayManager = {
-      defaultSession = "none+i3";
+      # defaultSession = "none+i3";
       ly.enable = true;
     };
     xserver = {
@@ -15,7 +15,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    picom dunst i3lock i3status dmenu # autotiling
+    picom dunst i3lock dmenu autotiling
   ];
 
   environment.etc."X11/xinit/xinitrc".text = ''

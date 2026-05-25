@@ -21,17 +21,17 @@
 *.color5: #A02F6F
 *.color13: #CE5C97
 
-*.color6: #3CA89F
-*.color14: #24837B
+*.color6: #24837B
+*.color14: #3CA89F
 
 *.color7: #878580
 *.color15: #CECDC3
 
-URxvt.font: xft:Geist\ Mono\ Nerd\ Font:style=Regular:size=10
-URxvt.boldFont: xft:Geist\ Mono\ Nerd\ Font:style=Bold:size=10
-URxvt.italicFont:  xft:Geist\ Mono\ Nerd\ Font:style=Italic:size=10
-URxvt.boldItalicfont: xft:Geist\ Mono\ Nerd\ Font:style=Bold Italic:size=10
-URxvt.letterSpace: -1
+URxvt.font: xft:Geist\ Mono\ Nerd\ Font:style=Regular:size=11
+URxvt.boldFont: xft:Geist\ Mono\ Nerd\ Font:style=Bold:size=11
+URxvt.italicFont:  xft:Geist\ Mono\ Nerd\ Font:style=Italic:size=11
+URxvt.boldItalicfont: xft:Geist\ Mono\ Nerd\ Font:style=Bold Italic:size=11
+URxvt.letterSpace: 0
 URxvt.lineSpace: 0
 URxvt.geometry: 400x400
 URxvt.internalBorder: 16

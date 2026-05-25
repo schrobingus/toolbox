@@ -17,6 +17,7 @@
     czkawka fzf
     typst tinymist
     uv # gdal
+    python3Packages.yt-dlp
     # nixos-rebuild-ng colmena
 
     # TeX Packages

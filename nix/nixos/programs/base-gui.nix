@@ -1,25 +1,29 @@
 { pkgs, ... }:
 
 {
-  # NOTE: when you start porting to sway, you may want to split this into two files (xorg, wayland)
+  # TODO: make an extended packages file
   environment.systemPackages = with pkgs; [
-    librewolf
-    ghostty rxvt-unicode
-    vesktop
-    mpv celluloid amberol # TODO: narrow
-    sioyek papers # TODO: narrow
-    nautilus
-    gnome-font-viewer pavucontrol
-    feh xsel lxappearance scrot
-    xorg.xrandr xorg.xgamma
-    maim xclip
+    librewolf ungoogled-chromium
+    mpv
+    sioyek
+    xfce.thunar
+    # TODO: get the fontviewer package on nixpkgs
+    gnome-font-viewer
+    pavucontrol
+    lxappearance
 
-    # TODO: might want to move these into their own file, they're kinda important
     glib gsettings-desktop-schemas
-    xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
     mesa mesa-gl-headers libglvnd
     mesa-demos
   ];
 
   programs.dconf.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    extraPortals = with pkgs; pkgs.lib.mkForce [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-wlr
+    ];
+  };
 }

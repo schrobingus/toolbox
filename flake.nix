@@ -132,6 +132,32 @@
         extraHomeModules = commonHomeModules;
       };
 
+      thonk = {
+        system = "x86_64-linux";
+        extraNixOSModules = [
+          {
+            networking.hostName = "thonk";
+            system.stateVersion = "25.11";
+          }
+          ./nix/nixos/bootloaders/grub-efi.nix
+          ./nix/nixos/hardware-configuration/thonk.nix
+          # ./nix/nixos/interfaces/i3.nix
+          ./nix/nixos/interfaces/sway.nix
+          # ./nix/nixos/interfaces/gnome.nix
+          ./nix/nixos/programs/base-cli.nix
+          ./nix/nixos/programs/base-gui.nix
+          ./nix/nixos/programs/base-gui-wayland.nix
+          # ./nix/nixos/programs/base-gui-xorg.nix
+          ./nix/nixos/programs/extra-gui.nix
+          ./nix/nixos/programs/portable-cli.nix
+          ./nix/nixos/fonts.nix
+        ];
+        extraHomeModules = commonHomeModules ++ [
+          ./nix/home/nix-index-db.nix
+        ];
+        linkDotfilesFromStore = false;
+      };
+
       flakyvm-qemu = {
         system = "aarch64-linux";
         extraNixOSModules = [
