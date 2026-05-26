@@ -74,6 +74,10 @@
 ;; Disable Evil Snipe (Avy is used instead).
 (package! evil-snipe :disable t)
 
+;; Install Org Modern faces.
+;; NOTE: this is not used, but it might be a good idea to use later. fonts need configuration
+;; (package! org-modern)
+
 ;; Install Aggressive Indent mode.
 (package! aggressive-indent)
 

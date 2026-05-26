@@ -21,12 +21,13 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (if (eq system-type 'darwin)
-                    (font-spec :family "SF Mono" :size 13)
-                  (font-spec :family "GeistMono Nerd Font" :size 15))
-      doom-variable-pitch-font (if (eq system-type 'darwin)
-                                   (font-spec :family "SF Pro" :size 13)
-                                 (font-spec :family "Geist" :size 15)))
+;; (setq doom-font (if (eq system-type 'darwin)
+;;                     (font-spec :family "SF Mono" :size 13)
+;;                   (font-spec :family "GeistMono Nerd Font" :size 15))
+;;       doom-variable-pitch-font (if (eq system-type 'darwin)
+;;                                    (font-spec :family "SF Pro" :size 13)
+;;                                  (font-spec :family "Geist" :size 15)))
+(setq doom-font (font-spec :family "Monaco" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -47,13 +48,22 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq org-directory "~/Notes/")
 
 ;; Change some basic settings.
 (setq auto-save-default nil) ;; Disable auto save, as it leaves junk files.
 (setq dired-kill-when-opening-new-dired-buffer t) ;; Prevent Dired buffers from opening on new directory.
+(setq max-lisp-eval-depth 32000)
 (pixel-scroll-precision-mode 1) ;; Enable smooth scrolling.
 (+global-word-wrap-mode 1) ;; Enable word wrapping (the Doom way).
+
+;; When on macOS, disable using the PTY buffer for processes, except on EAT:
+;; (when (eq system-type 'darwin)
+;;   (setq process-connection-type nil)
+;;   (add-hook 'eat-mode-hook
+;;             (lambda () (setq-local process-connection-type t)))
+;;   (add-hook 'eat-eshell-mode-hook
+;;             (lambda () (setq-local process-connection-type t))))
 
 ;; Create aliases for eshell, taken from the zsh config.
 (defun eshell-command-exists-p (command)
@@ -80,11 +90,11 @@
         (eshell/alias "drf" "sudo darwin-rebuild switch --flake $DOTDIR $@*"))
     (when (and (eq system-type 'darwin) (eshell-command-exists-p "nix"))
       (eshell/alias "drs" "sudo nix run nix-darwin/master#darwin-rebuild -- switch $@*")
-      (eshell/alias "drs" "sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake $DOTDIR $@*")))
+      (eshell/alias "drf" "sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake $DOTDIR $@*")))
   ;; home-manager
   (when (eshell-command-exists-p "home-manager")
     (eshell/alias "nhs" "home-manager switch $@*")
-    (eshell/alias "nhs" "home-manager switch --flake $DOTDIR $@*"))
+    (eshell/alias "nhf" "home-manager switch --flake $DOTDIR $@*"))
   ;; rosetta shell
   (when (file-exists-p "/usr/bin/arch")
     (eshell/alias "x86_sh" "/usr/bin/arch -x86_64 /bin/sh $@*"))
@@ -139,7 +149,9 @@
   (electric-indent-mode 0)
   (global-aggressive-indent-mode 1))
 
-;; TODO: make corfu run with TAB or C-SPC
+;; Turn off auto mode for Corfu.
+(after! corfu
+  (setq corfu-auto nil))
 
 ;; TODO: consider readding dirvish
 
@@ -181,6 +193,10 @@
   (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode))
 
 ;; TODO: consider readding auto-dark
+
+;; Reset the height of `eglot-inlay-hint-face`.
+(after! eglot
+  (set-face-attribute 'eglot-inlay-hint-face nil :height 'unspecified))
 
 ;; TODO: figure out how well latex is working out here
 
