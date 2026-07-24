@@ -10,7 +10,6 @@
       user-mail-address "brent.monning.jr@gmail.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
 ;; - `doom-font' -- the primary font to use
 ;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
 ;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
@@ -18,21 +17,24 @@
 ;; - `doom-symbol-font' -- for symbols
 ;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
 ;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
 ;;
+;; TODO: install SF Mono on the flake
 ;; (setq doom-font (if (eq system-type 'darwin)
 ;;                     (font-spec :family "SF Mono" :size 13)
 ;;                   (font-spec :family "GeistMono Nerd Font" :size 15))
 ;;       doom-variable-pitch-font (if (eq system-type 'darwin)
 ;;                                    (font-spec :family "SF Pro" :size 13)
 ;;                                  (font-spec :family "Geist" :size 15)))
-(setq doom-font (font-spec :family "Monaco" :size 13))
-;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
+(setq doom-font (if (eq system-type 'darwin)
+                    (font-spec :family "Monaco" :size 13)
+                  (font-spec :family "GeistMono Nerd Font" :size 15))
+      doom-variable-pitch-font (if (eq system-type 'darwin)
+                                   (font-spec :family "Monaco" :size 13)
+                                 (font-spec :family "Geist" :size 15)))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -48,22 +50,13 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Notes/")
+(setq org-directory "~/Notes")
 
 ;; Change some basic settings.
 (setq auto-save-default nil) ;; Disable auto save, as it leaves junk files.
 (setq dired-kill-when-opening-new-dired-buffer t) ;; Prevent Dired buffers from opening on new directory.
-(setq max-lisp-eval-depth 32000)
 (pixel-scroll-precision-mode 1) ;; Enable smooth scrolling.
 (+global-word-wrap-mode 1) ;; Enable word wrapping (the Doom way).
-
-;; When on macOS, disable using the PTY buffer for processes, except on EAT:
-;; (when (eq system-type 'darwin)
-;;   (setq process-connection-type nil)
-;;   (add-hook 'eat-mode-hook
-;;             (lambda () (setq-local process-connection-type t)))
-;;   (add-hook 'eat-eshell-mode-hook
-;;             (lambda () (setq-local process-connection-type t))))
 
 ;; Create aliases for eshell, taken from the zsh config.
 (defun eshell-command-exists-p (command)
@@ -90,11 +83,12 @@
         (eshell/alias "drf" "sudo darwin-rebuild switch --flake $DOTDIR $@*"))
     (when (and (eq system-type 'darwin) (eshell-command-exists-p "nix"))
       (eshell/alias "drs" "sudo nix run nix-darwin/master#darwin-rebuild -- switch $@*")
-      (eshell/alias "drf" "sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake $DOTDIR $@*")))
+      (eshell/alias "drs" "sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake $DOTDIR $@*")))
   ;; home-manager
   (when (eshell-command-exists-p "home-manager")
     (eshell/alias "nhs" "home-manager switch $@*")
-    (eshell/alias "nhf" "home-manager switch --flake $DOTDIR $@*"))
+    (eshell/alias "nhs" "home-manager switch --flake $DOTDIR $@*"))
+>>>>>>> b9f974b (bring up to speed before merging in with everything)
   ;; rosetta shell
   (when (file-exists-p "/usr/bin/arch")
     (eshell/alias "x86_sh" "/usr/bin/arch -x86_64 /bin/sh $@*"))
@@ -115,7 +109,11 @@
 (map! :i "C-k" #'previous-line)
 (map! :i "C-l" #'forward-char)
 
-;; TODO: add text scale adjustment binding
+;; Enact Magit horizontal movement on Emacs.
+(map! :after magit
+      :map magit-mode-map
+      :nv "h" #'evil-backward-char
+      :nv "l" #'evil-forward-char)
 
 ;; Assign Evil's delete function to the black hole register.
 ;; In other words, disabling yank on delete.
@@ -149,14 +147,9 @@
   (electric-indent-mode 0)
   (global-aggressive-indent-mode 1))
 
-;; Turn off auto mode for Corfu.
-(after! corfu
-  (setq corfu-auto nil))
+;; TODO: consider configuring dirvish
 
-;; TODO: consider readding dirvish
-
-;; TODO: consider readding agent shell
-
+;; Set frame settings (line spacing + window margins).
 (use-package! frame
   :config
   (setq-default default-frame-alist
@@ -178,12 +171,32 @@
 (window-divider-mode 1)
 
 ;; Nuke the calls for hiding the mode line at any given point.
-;; NOTE: This is too deeply engrained to remove the package itself, this effectively disables it.
-(advice-add #'hide-mode-line-mode :override #'ignore)
+(advice-add #'hide-mode-line-mode      :override #'ignore)
+(advice-add #'mode-line-invisible-mode :override #'ignore)
+
+;; Disable the Doom Modeline icons.
+(setq doom-modeline-icon nil)
+
+;; Enact title formatting.
+(setq frame-title-format "%b - Emacs")
+
+;; Enable savefold.el for folding persistence.
+(use-package! savefold
+  :init
+  (setq org-startup-folded 'showeverything)
+  (setq savefold-backends '(outline org hideshow))
+  (setq savefold-directory (locate-user-emacs-file "savefold"))
+  :config
+  (with-eval-after-load 'savefold-org
+    (add-to-list 'savefold-org--overlay-fold-specs 'org-fold-outline))
+  (with-eval-after-load 'savefold-outline
+    (advice-add 'savefold-outline--outline-foldp :around
+                (lambda (orig-fn ov)
+                  (or (funcall orig-fn ov)
+                      (memq (overlay-get ov 'invisible) '(org-fold-outline))))))
+  (savefold-mode 1))
 
 ;; TODO: consider readding olivetti
-
-;; TODO: consider readding minions (if you revert back to the default modeline)
 
 ;; Enable the EAT terminal, and hook it into Eshell and calls for Term.
 (use-package! eat
@@ -192,11 +205,15 @@
   (add-hook 'eshell-load-hook #'eat-eshell-mode)
   (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode))
 
-;; TODO: consider readding auto-dark
-
-;; Reset the height of `eglot-inlay-hint-face`.
-(after! eglot
-  (set-face-attribute 'eglot-inlay-hint-face nil :height 'unspecified))
+;; Make a function for automatic light/dark theming, and enact on macOS when available.
+(defun load-doom-flexoki-dynamically (appearance)
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes)
+  (pcase appearance
+    ('light (load-theme 'doom-flexoki-light t))
+    ('dark  (load-theme 'doom-flexoki t))))
+(when (boundp 'ns-system-appearance-change-functions)
+  (add-hook 'ns-system-appearance-change-functions #'load-doom-flexoki-dynamically))
 
 ;; TODO: figure out how well latex is working out here
 
@@ -205,7 +222,11 @@
   :custom (auctex-latexmk-inherit-TeX-PDF-mode t)
   :config (auctex-latexmk-setup))
 
-;; TODO: consider readding pet mode AFTER the python stack on doom has been figured
+;; Enable Virtualenv integration for Eshell.
+;; TODO: replace with PET or some sort of custom module, as uv doesn't work
+(use-package! eshell-venv
+  :hook
+  (eshell-mode . eshell-venv-mode))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `with-eval-after-load' block, otherwise Doom's defaults may override your

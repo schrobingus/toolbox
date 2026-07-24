@@ -53,6 +53,9 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
+;; Install the Popon package for Emacs.
+(package! popon :recipe (:host codeberg :repo "akib/emacs-popon"))
+
 ;; Install the EAT terminal.
 (package! eat
   :recipe (:host nil
@@ -74,15 +77,18 @@
 ;; Disable Evil Snipe (Avy is used instead).
 (package! evil-snipe :disable t)
 
-;; Install Org Modern faces.
-;; NOTE: this is not used, but it might be a good idea to use later. fonts need configuration
-;; (package! org-modern)
-
 ;; Install Aggressive Indent mode.
 (package! aggressive-indent)
 
 ;; Install Rainbow mode to highlight colors.
 (package! rainbow-mode)
+
+;; Install savefold.el.
+(package! savefold)
+
+;; Install Virtualenv integration for Eshell.
+(package! eshell-venv
+  :recipe (:type git :repo "https://git.sr.ht/~struanr/eshell-venv"))
 
 ;; Install latexmk integration with AUCTeX.
 (package! auctex-latexmk)
