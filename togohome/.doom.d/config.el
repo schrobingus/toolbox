@@ -30,10 +30,10 @@
 ;;                                    (font-spec :family "SF Pro" :size 13)
 ;;                                  (font-spec :family "Geist" :size 15)))
 (setq doom-font (if (eq system-type 'darwin)
-                    (font-spec :family "Monaco" :size 13)
+                    (font-spec :family "SFMono Nerd Font" :size 14)
                   (font-spec :family "GeistMono Nerd Font" :size 15))
       doom-variable-pitch-font (if (eq system-type 'darwin)
-                                   (font-spec :family "Monaco" :size 13)
+                                   (font-spec :family "SF Pro" :size 14)
                                  (font-spec :family "Geist" :size 15)))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -159,7 +159,7 @@
                          '(left-fringe           . 0)
                          '(right-fringe          . 0)
                          '(tool-bar-lines        . 0)
-                         '(line-spacing          . 1)
+                         '(line-spacing          . 2)
                          '(vertical-scroll-bars  . nil))
                         default-frame-alist))
   (setq-default window-resize-pixelwise t)

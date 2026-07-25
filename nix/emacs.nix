@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, pkgs-stable, ... }:
 
 let
   emacsPlusPatches = [ # For Emacs 30.2, Emacs Plus Commit b7f4710.
@@ -39,18 +39,20 @@ let
     "-fno-trapping-math"              # Gives more freedom for float operations.
     "-freciprocal-math"               # Calculate x/y as x * 1/y.
     "-fno-rounding-math"              # Assume the rounding mode is round-to-nearest.
-    "-fno-signaling-nans"             # Disable signaling NaNs.
     "-fassociative-math"              # Allow float manipulation to be reordered.
     "-fno-signed-zeros"               # Treat -0.0 and +0.0 as identical.
-    "-frename-registers"              # Dependency reduction, great for ARM.
     "-funroll-loops"                  # Unroll loops whose iteration is obvious.
     "-fomit-frame-pointer"            # Don't maintain a frame pointer.
+
+    # Below are optimizations that take effect with GCC instead of LLVM.
+    "-fno-signaling-nans"             # Disable signaling NaNs.
+    "-frename-registers"              # Dependency reduction, great for ARM.
 
     # Target the CPU the build runs on for optimization. This kills portability, though.
     "-march=native"
     "-mtune=native"
   ];
-in pkgs.emacs30.overrideAttrs (oldAttrs: { # TODO: swap nixpkgs unstable out for a stable release (likely 26.05) to reduce repetitive builds over time
+in pkgs-stable.emacs30.overrideAttrs (oldAttrs: {
   patches = (oldAttrs.patches or []) ++ emacsPlusPatches ++ [
     # Add a Canvas API to Emacs.
     # (pkgs.fetchpatch {
@@ -71,7 +73,6 @@ in pkgs.emacs30.overrideAttrs (oldAttrs: { # TODO: swap nixpkgs unstable out for
     "--with-wide-int"             # Enable 64-bit integers no matter what.
   ];
 
-  # NIX_CFLAGS_COMPILE = (oldAttrs.NIX_CFLAGS_COMPILE or "") + " " + cflags;
   env = (oldAttrs.env or {}) // {
     NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " " + cflags;
   };

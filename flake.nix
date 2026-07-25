@@ -8,15 +8,29 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hjem = {
+      url = "github:feel-co/hjem";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
   };
 
-  outputs = { self, nixpkgs, nix-darwin, ... }: let
+  outputs = { self, nixpkgs, nixpkgs-stable, hjem, nix-darwin, ... } @ inputs: let
     lib = nixpkgs.lib;
 
-    mkSystem = { system, builder, baseModule, extraModules ? [] }:
+    mkSystem = { system, builder, baseModule, extraModules ? [], specialArgs ? {} }:
       builder {
         inherit system;
-        specialArgs = { inherit self; };
+
+        specialArgs = {
+          inherit self inputs;
+
+          pkgs-stable = import nixpkgs-stable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        } // specialArgs;
+
         modules = [ baseModule ] ++ extraModules;
       };
 
@@ -24,10 +38,13 @@
       thonktuah = {
         system = "x86_64-linux";
         extraModules = [
-          { 
+          hjem.nixosModules.default
+
+          {
             networking.hostName = "thonktuah";
             services.xserver.xkb.options = "ctrl:swapcaps";
           }
+
           ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/hardware-configuration/e14-gen2.nix
           ./nix/nixos/interfaces/gnome.nix
@@ -35,7 +52,8 @@
           ./nix/nixos/programs/base-cli.nix
           ./nix/nixos/programs/devutils.nix
           ./nix/nixos/services/avahi.nix
-          ./nix/nixos/fonts.nix
+          ./nix/fonts.nix
+          ./nix/hjem.nix
         ];
       };
     };
@@ -44,8 +62,12 @@
       geogaddi = {
         system = "aarch64-darwin";
         extraModules = [
+          hjem.darwinModules.default
+
           # ./nix/darwin/homebrew.nix
           ./nix/darwin/settings.nix
+          ./nix/fonts.nix
+          ./nix/hjem.nix
         ];
       };
     };
@@ -56,6 +78,10 @@
       builder = nixpkgs.lib.nixosSystem;
       baseModule = ./nix/nixos/default.nix;
       extraModules = cfg.extraModules or [];
+      specialArgs = {
+        homeDirectory    = "/home/brent";
+        toolboxDirectory = "/home/brent/Sources/toolbox";
+      };
     }) nixosTargets;
 
     darwinConfigurations = lib.mapAttrs (_: cfg: mkSystem {
@@ -63,6 +89,10 @@
       builder = nix-darwin.lib.darwinSystem;
       baseModule = ./nix/darwin/default.nix;
       extraModules = cfg.extraModules or [];
+      specialArgs = {
+        homeDirectory    = "/Users/brent";
+        toolboxDirectory = "/Users/brent/Sources/toolbox";
+      };
     }) darwinTargets;
   };
 }
