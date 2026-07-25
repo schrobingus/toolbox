@@ -12,7 +12,7 @@ horizontal_padding = 48
 frame_width = 4
 sort = no
 idle_threshold = 120
-font = Poppins 9
+font = Geist 9
 line_height = 4
 markup = full
 format = <b>%s</b>\n%b
@@ -39,18 +39,18 @@ context = ctrl+shift+period
 
 [urgency_low]
 timeout = 4
-background = "#141c21"
-foreground = "#93a1a1"
-frame_color = "#819400"
+background = "#100F0F"
+foreground = "#CECDC3"
+frame_color = "#879A39"
 
 [urgency_normal]
 timeout = 8
-background = "#141c21"
-foreground = "#93a1a1"
-frame_color = "#2587cc"
+background = "#100F0F"
+foreground = "#CECDC3"
+frame_color = "#4385BE"
 
 [urgency_critical]
 timeout = 0
-background = "#141c21"
-foreground = "#93a1a1"
-frame_color = "#d12f2c"
+background = "#100F0F"
+foreground = "#CECDC3"
+frame_color = "#D14D41"

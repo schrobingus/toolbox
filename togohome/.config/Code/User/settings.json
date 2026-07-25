@@ -20,7 +20,7 @@
     { "before": ["d"], "after": ["\"", "_", "d"] }
   ],
   "vim.insertModeKeyBindings": [
-    { "before": ["j", "j"], "after": ["<Esc>"] }
+    { "before": ["j", "k"], "after": ["<Esc>"] }
   ],
   "vim.insertModeKeyBindingsNonRecursive": [
     { "before": ["<C-h>"], "after": ["<Left>"] },

@@ -1,35 +1,35 @@
-{ pkgs, self, ... }:
+{ pkgs, pkgs-stable, self, toolboxDirectory, ... }:
 
 {
   environment.systemPackages = with pkgs; [
-    colmena deploy-rs morph 
+    (import ../emacs.nix { inherit lib pkgs pkgs-stable; })
+
     nix-output-monitor
+    uv ty jupyter marimo
+    rustc cargo clippy rust-analyzer
+    ghc stack cabal-install haskell-language-server
+    go gopls
     luajit luarocks
-    fastfetch
+    nodejs
+    xcodes utm qemu
+    fastfetch pfetch
     ripgrep vim wget
-    p7zip
+    zstd p7zip
+    texliveFull typst
+    pandoc marp-cli
+    yt-dlp
+    zsh-history-substring-search
   ];
+
+  environment.variables = {
+    TOOLBOX_DIRECTORY = toolboxDirectory;
+    ZSH_HSS =
+        "${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh";
+  };
 
   programs.zsh.enable = true;
 
-  # TODO: this is commented because of determinate nix. make a conditional that adjusts as so
-  /* nix = {
-    enable = true;
-    package = pkgs.nix;
-    settings = {
-      experimental-features = "nix-command flakes";
-      max-jobs = 4;
-      cores = 2;
-    };
-  }; */
-  nix.enable = false;
-  
-  # FIXME: this is specifically because of peazip. do a pr to nixpkgs. check home/default.nix
-  nixpkgs.config.allowUnsupportedSystem = true;
-
-  ids.gids.nixbld = 350;
-
-  system.configurationRevision = self.rev or self.dirtyRev or null;
+  nix.enable = false; # Let the Nix install sort things out.
 
   system.stateVersion = 4;
 
