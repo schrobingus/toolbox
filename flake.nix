@@ -8,14 +8,25 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lem = {
+      url = "github:lem-project/lem";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hjem = {
       url = "github:feel-co/hjem";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
+    apple-fonts = {
+      url = "github:Lyndeno/apple-fonts.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    scroll = {
+      url = "github:Diax170/scroll-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, hjem, nix-darwin, ... } @ inputs: let
+  outputs = { self, nixpkgs, nixpkgs-stable, nix-darwin, hjem, ... } @ inputs: let
     lib = nixpkgs.lib;
 
     mkSystem = { system, builder, baseModule, extraModules ? [], specialArgs ? {} }:

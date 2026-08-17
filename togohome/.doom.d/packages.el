@@ -92,3 +92,6 @@
 
 ;; Install latexmk integration with AUCTeX.
 (package! auctex-latexmk)
+
+;; Install PET mode for Python tooling.
+(package! pet)

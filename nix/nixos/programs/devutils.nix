@@ -10,5 +10,8 @@
     cargo rustc clippy rust-analyzer
     go gopls
     dart flutter
+    android-tools heimdall
   ];
+
+  programs.nix-ld.enable = true;
 }

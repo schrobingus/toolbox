@@ -1,8 +1,10 @@
 { lib, pkgs, pkgs-stable, ... }:
 
 let
-  emacsPlusPatches = [ # For Emacs 30.2, Emacs Plus Commit b7f4710.
 
+  # For Emacs 30.2 on Darwin, Emacs Plus Commit b7f4710.
+  # These are specifically only for Darwin.
+  emacsPlusPatches = [
     # COMMUNITY PATCHES
     (pkgs.fetchpatch { # Unfuck the TTY/PTY buffer on macOS with aggressive read buffering.
       url    = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/b7f47101868eeda09ec75251eabb0cce7446abb2/community/patches/aggressive-read-buffering/emacs-30.patch";
@@ -31,46 +33,54 @@ let
       sha256 = "sha256-3QLq91AQ6E921/W9nfDjdOUWR8YVsqBAT/W9c1woqAw=";
     })
   ];
-  cflags = lib.concatStringsSep " " [
-    "-O3"                             # Aggressive (build) compilation.
-    "-fno-math-errno"                 # Don't set errno after math functions.
-    "-funsafe-math-optimizations"     # Reorders and transforms float ops.
-    "-fno-finite-math-only"           # Still put in safeguards for NaN.
-    "-fno-trapping-math"              # Gives more freedom for float operations.
-    "-freciprocal-math"               # Calculate x/y as x * 1/y.
-    "-fno-rounding-math"              # Assume the rounding mode is round-to-nearest.
-    "-fassociative-math"              # Allow float manipulation to be reordered.
-    "-fno-signed-zeros"               # Treat -0.0 and +0.0 as identical.
-    "-funroll-loops"                  # Unroll loops whose iteration is obvious.
-    "-fomit-frame-pointer"            # Don't maintain a frame pointer.
 
-    # Below are optimizations that take effect with GCC instead of LLVM.
-    "-fno-signaling-nans"             # Disable signaling NaNs.
-    "-frename-registers"              # Dependency reduction, great for ARM.
+  cflags = lib.concatStringsSep " " ([
+    "-O3"                            # Aggressive (build) compilation.
+    "-fno-math-errno"                # Don't set errno after math functions.
+    "-funsafe-math-optimizations"    # Reorders and transforms float ops.
+    "-fno-finite-math-only"          # Still put in safeguards for NaN.
+    "-fno-trapping-math"             # Gives more freedom for float operations.
+    "-freciprocal-math"              # Calculate x/y as x * 1/y.
+    "-fno-rounding-math"             # Assume the rounding mode is round-to-nearest.
+    "-fassociative-math"             # Allow float manipulation to be reordered.
+    "-fno-signed-zeros"              # Treat -0.0 and +0.0 as identical.
+    "-funroll-loops"                 # Unroll loops whose iteration is obvious.
+    "-fomit-frame-pointer"           # Don't maintain a frame pointer.
 
-    # Target the CPU the build runs on for optimization. This kills portability, though.
+    # Target the CPU the build runs on for optimization, but executables lose portability entirely.
     "-march=native"
     "-mtune=native"
-  ];
-in pkgs-stable.emacs30.overrideAttrs (oldAttrs: {
-  patches = (oldAttrs.patches or []) ++ emacsPlusPatches ++ [
-    # Add a Canvas API to Emacs.
-    # (pkgs.fetchpatch {
-    #   url    = "https://raw.githubusercontent.com/minad/emacs-canvas-patch/refs/heads/main/canvas.diff";
-    #   sha256 = "1jrn222w1nfjqzhiiy91q21hvh9xbsm9rhsp5r8ybq6cpfh216k4";
-    # })
-  ];
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    "-fno-signaling-nans"    # Disable signaling NaNs.
+    "-frename-registers"     # Dependency reduction, great for ARM.
+  ]);
+
+  emacsPackage =
+    if pkgs.stdenv.isLinux
+    then pkgs-stable.emacs30-pgtk
+    else pkgs-stable.emacs30;
+
+in emacsPackage.overrideAttrs (oldAttrs: {
+  patches = (oldAttrs.patches or [])
+            ++ (lib.optionals pkgs.stdenv.isDarwin emacsPlusPatches);
 
   configureFlags = (oldAttrs.configureFlags or []) ++ [
-    "--with-native-compilation"   # Enable native compilation for Elisp.
-    "--with-modules"              # Enable dynamic module loading.
-    "--with-xwidgets"             # Enable XWidgets support, including a WebKit buffer.
-    "--with-tree-sitter"          # Enable Treesitter.
-    "--with-gnutls"               # Enable TLS.
-    "--with-json"                 # Enable the Jansson-powered JSON parser.
-    "--with-rsvg"                 # Enable SVG rendering.
-    "--with-xml2"                 # Enable XML support.
-    "--with-wide-int"             # Enable 64-bit integers no matter what.
+    "--with-native-compilation"    # Enable native compilation for Elisp.
+    "--with-modules"               # Enable dynamic module loading.
+    "--with-tree-sitter"           # Enable Treesitter.
+    "--with-gnutls"                # Enable TLS.
+    "--with-json"                  # Enable the Jansson-powered JSON parser.
+    "--with-rsvg"                  # Enable SVG rendering.
+    "--with-xml2"                  # Enable XML support.
+    "--with-wide-int"              # Enable 64-bit integers no matter what.
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    # NOTE: Doesn't work on Linux, so it's Darwin only. Supposedly reliant on Nixpkgs PR #365784.
+    "--with-xwidgets"              # Enable XWidgets support, including a WebKit buffer.
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    "--with-cairo"        # Enable Cairo-based drawing by default.
+    "--with-harfbuzz"     # Enable better font rendering with Harfbuzz.
+    "--with-dbus"         # Enact desktop protocols such as notifications.
+    "--with-sound=yes"    # Enable Alsa sound playback.
   ];
 
   env = (oldAttrs.env or {}) // {

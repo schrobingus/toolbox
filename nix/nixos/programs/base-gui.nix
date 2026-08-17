@@ -6,21 +6,23 @@
   environment.systemPackages = with pkgs; [
     librewolf
     ghostty emacs-pgtk # rxvt-unicode
-    nautilus
+    nautilus xfce.thunar
     vicinae
     vscodium
     vesktop
-    /*mpv*/ celluloid amberol # TODO: narrow
-    papers
+    transmission_4-gtk
+    mpv celluloid amberol
+    papers sioyek
     localsend
     libreoffice
-    gnome-font-viewer pavucontrol
-    # feh xsel lxappearance scrot
-    # xorg.xrandr xorg.xgamma
-    # maim xclip
+    gnome-font-viewer pavucontrol lxappearance
+    feh xsel lxappearance scrot
+    xorg.xrandr xorg.xgamma
+    maim xclip
 
     # in loving memory of sou eduroam
-    openconnect gp-saml-gui
+    # NEVERMIND LMAO L BOZO LONG LIVE OSU EDUROAM
+    # openconnect gp-saml-gui
     # globalprotect-openconnect
 
     adw-gtk3
@@ -31,10 +33,13 @@
     mesa-demos
   ];
 
-  # required for globalprotect slop
-  # nixpkgs.config.permittedInsecurePackages = [
-  #   "qtwebengine-5.15.19"
-  # ];
-
   programs.dconf.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    extraPortals = with pkgs; pkgs.lib.mkForce [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-wlr
+    ];
+  };
 }

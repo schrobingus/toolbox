@@ -58,6 +58,10 @@
 (pixel-scroll-precision-mode 1) ;; Enable smooth scrolling.
 (+global-word-wrap-mode 1) ;; Enable word wrapping (the Doom way).
 
+;; Do not highlight lines or display line numbers in anything but `prog-mode'.
+(setq global-hl-line-modes '(prog-mode))
+(remove-hook! '(text-mode-hook conf-mode-hook) #'display-line-numbers-mode)
+
 ;; Create aliases for eshell, taken from the zsh config.
 (defun eshell-command-exists-p (command)
   (not (null (eshell-search-path command))))
@@ -88,7 +92,6 @@
   (when (eshell-command-exists-p "home-manager")
     (eshell/alias "nhs" "home-manager switch $@*")
     (eshell/alias "nhs" "home-manager switch --flake $DOTDIR $@*"))
->>>>>>> b9f974b (bring up to speed before merging in with everything)
   ;; rosetta shell
   (when (file-exists-p "/usr/bin/arch")
     (eshell/alias "x86_sh" "/usr/bin/arch -x86_64 /bin/sh $@*"))
@@ -222,11 +225,39 @@
   :custom (auctex-latexmk-inherit-TeX-PDF-mode t)
   :config (auctex-latexmk-setup))
 
-;; Enable Virtualenv integration for Eshell.
-;; TODO: replace with PET or some sort of custom module, as uv doesn't work
-(use-package! eshell-venv
-  :hook
-  (eshell-mode . eshell-venv-mode))
+;; Enable PET mode for Python tooling detection.
+(use-package! pet
+  :custom
+  (pet-find-file-functions
+   '(pet-find-file-from-project-root
+     pet-locate-dominating-file))
+  :init
+  (add-hook 'python-base-mode-hook 'pet-mode -10)
+  (add-hook 'pet-after-buffer-local-vars-setup #'pet-bingus-setup-venv-env))
+(defun pet-bingus-resolved-venv ()
+  "Return the project's venv root, refusing to trust a dead path.
+If `pet-virtualenv-root' returns something on disk, use it as-is. If it
+returns a stale/nonexistent path, unset that env var, clear pet's cache
+for this project, and re-derive from a different environment instead."
+  (let ((venv (pet-virtualenv-root)))
+    (if (and venv (file-directory-p venv))
+        venv
+      (let ((process-environment (copy-sequence process-environment)))
+        (setenv "VIRTUAL_ENV" nil)
+        (pet-cache-clear-project)
+        (let ((fallback (pet-virtualenv-root)))
+          (and fallback (file-directory-p fallback) fallback))))))
+(defun pet-bingus-setup-venv-env ()
+  "Set python-shell/venv variables buffer-locally, never globally.
+Shadowing `process-environment' per-buffer means subprocesses started
+from THIS buffer (shell, compile, python-shell, etc.) see the right
+`VIRTUAL_ENV', while other Python buffers on other projects are
+unaffected -- no more cross-project bleed via global `setenv'."
+  (when-let* ((venv (pet-bingus-resolved-venv)))
+    (setq-local python-shell-interpreter (pet-executable-find "python"))
+    (setq-local python-shell-virtualenv-root venv)
+    (setq-local process-environment (copy-sequence process-environment))
+    (setenv "VIRTUAL_ENV" venv)))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `with-eval-after-load' block, otherwise Doom's defaults may override your
