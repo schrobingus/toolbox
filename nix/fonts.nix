@@ -28,6 +28,6 @@
       sf-compact
       ny
     ])
-  ++ (pkgs.lib.optional pkgs.stdenv.isLinux
+  ++ (pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux
     pkgs.noto-fonts-emoji-blob-bin); # emoji package for Linux
 }

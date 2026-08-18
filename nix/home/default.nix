@@ -27,7 +27,7 @@
 
     # TODO: move some of these packages over another nix import
   ] ++ (
-    if pkgs.stdenv.isLinux then [
+    if pkgs.stdenv.hostPlatform.isLinux then [
       # Linux Packages
       dconf2nix
       adw-gtk3 adwaita-icon-theme morewaita-icon-theme

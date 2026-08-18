@@ -50,19 +50,19 @@ let
     # Target the CPU the build runs on for optimization, but executables lose portability entirely.
     "-march=native"
     "-mtune=native"
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
+  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     "-fno-signaling-nans"    # Disable signaling NaNs.
     "-frename-registers"     # Dependency reduction, great for ARM.
   ]);
 
   emacsPackage =
-    if pkgs.stdenv.isLinux
+    if pkgs.stdenv.hostPlatform.isLinux
     then pkgs-stable.emacs30-pgtk
     else pkgs-stable.emacs30;
 
 in emacsPackage.overrideAttrs (oldAttrs: {
   patches = (oldAttrs.patches or [])
-            ++ (lib.optionals pkgs.stdenv.isDarwin emacsPlusPatches);
+            ++ (lib.optionals pkgs.stdenv.hostPlatform.isDarwin emacsPlusPatches);
 
   configureFlags = (oldAttrs.configureFlags or []) ++ [
     "--with-native-compilation"    # Enable native compilation for Elisp.
@@ -73,10 +73,10 @@ in emacsPackage.overrideAttrs (oldAttrs: {
     "--with-rsvg"                  # Enable SVG rendering.
     "--with-xml2"                  # Enable XML support.
     "--with-wide-int"              # Enable 64-bit integers no matter what.
-  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
     # NOTE: Doesn't work on Linux, so it's Darwin only. Supposedly reliant on Nixpkgs PR #365784.
     "--with-xwidgets"              # Enable XWidgets support, including a WebKit buffer.
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
+  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     "--with-cairo"        # Enable Cairo-based drawing by default.
     "--with-harfbuzz"     # Enable better font rendering with Harfbuzz.
     "--with-dbus"         # Enact desktop protocols such as notifications.

@@ -46,6 +46,28 @@
       };
 
     nixosTargets = {
+      thonk = {
+        system = "x86_64-linux";
+        extraModules = [
+          hjem.nixosModules.default
+
+          {
+            networking.hostName = "thonk";
+          }
+
+          ./nix/nixos/bootloaders/grub-efi.nix
+          ./nix/nixos/hardware-configuration/x131e-chromebook.nix
+          ./nix/nixos/interfaces/sway.nix
+          ./nix/nixos/programs/base-gui.nix
+          ./nix/nixos/programs/base-cli.nix
+          ./nix/nixos/programs/clankers.nix
+          ./nix/nixos/programs/devutils.nix
+          ./nix/nixos/services/avahi.nix
+          ./nix/fonts.nix
+          ./nix/hjem.nix
+        ];
+      };
+
       thonktuah = {
         system = "x86_64-linux";
         extraModules = [

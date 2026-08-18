@@ -9,6 +9,7 @@
     comma
     zsh-history-substring-search
     nixos-rebuild-ng
+    ripgrep fd
   ];
 
   environment.variables.ZSH_HSS =
