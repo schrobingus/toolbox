@@ -6,8 +6,6 @@ font pango:Geist 9
 
 floating_modifier $mod
 
-exec autotiling
-
 # output * bg "$HOME/.config/wallpaper.jpg" fill
 exec wbg -s "$HOME/.config/wallpaper.jpg"
 
@@ -37,18 +35,30 @@ bindsym $mod+h focus left
 bindsym $mod+j focus down
 bindsym $mod+k focus up
 bindsym $mod+l focus right
+bindsym $mod+b focus beginning
+bindsym $mod+e focus end
+
+bindsym $mod+Shift+Left focus output left
+bindsym $mod+Shift+Right focus output right
 
 bindsym $mod+Shift+h move left
 bindsym $mod+Shift+j move down
 bindsym $mod+Shift+k move up
 bindsym $mod+Shift+l move right
+bindsym $mod+Shift+b move beginning
+bindsym $mod+Shift+e move end
 
-bindsym $mod+v split h
-bindsym $mod+s split v
+bindsym $mod+Alt+h move left nomode
+bindsym $mod+Alt+j move down nomode
+bindsym $mod+Alt+k move up nomode
+bindsym $mod+Alt+l move right nomode
+bindsym $mod+Alt+b move beginning nomode
+bindsym $mod+Alt+e move end nomode
 
-bindsym $mod+t layout tabbed
-bindsym $mod+e layout toggle split
-bindsym $mod+w layout stacking
+# TODO: try focus ring at some point
+
+bindsym $mod+v set_mode h
+bindsym $mod+s set_mode v
 
 bindsym $mod+f floating toggle
 bindsym $mod+Shift+f fullscreen toggle
@@ -84,23 +94,65 @@ bindsym $mod+BackSpace reload
 
 bindsym Mod1+F4 kill
 bindsym $mod+q kill
-bindsym $mod+Shift+q exec "swaynag -t warning -m 'Really, exit?' -b 'Yes' 'swaymsg exit'"
+bindsym $mod+Shift+q exec "scrollnag -t warning -m 'Really, exit?' -b 'Yes' 'scrollmsg exit'"
 
 bindsym $mod+u resize shrink width 8 px or 8 ppt
 bindsym $mod+i resize grow width 8 px or 8 ppt
 bindsym $mod+Shift+u resize shrink height 8 px or 8 ppt
 bindsym $mod+Shift+i resize grow height 8 px or 8 ppt
 
-mode "resize" {
+mode "sizes" {
     bindsym h resize shrink width 8 px or 8 ppt
     bindsym j resize grow height 8 px or 8 ppt
     bindsym k resize shrink height 8 px or 8 ppt
     bindsym l resize grow width 8 px or 8 ppt
+    bindsym v cycle_size h next
+    bindsym Shift+v cycle_size h prev
+    bindsym s cycle_size v next
+    bindsym Shift+s cycle_size v prev
     bindsym Escape mode "default"
     bindsym Return mode "default"
     bindsym $mod+r mode "default"
 }
-bindsym $mod+r mode "resize"
+bindsym $mod+r mode "sizes"
+
+mode "align" {
+    bindsym h align left
+    bindsym j align down
+    bindsym k align up
+    bindsym l align right
+    bindsym c align center
+    bindsym m align middle
+    bindsym r align reset
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+    bindsym $mod+t mode "default"
+}
+bindsym $mod+t mode "align"
+
+# TODO: look into this "fit_size" thing
+
+mode "modes" {
+    bindsym h set_mode before
+    bindsym j set_mode nofocus
+    bindsym k set_mode focus
+    bindsym l set_mode after
+    bindsym b set_mode beginning
+    bindsym e set_mode end
+    bindsym s set_mode center_vert
+    bindsym Shift+s set_mode nocenter_vert
+    bindsym v set_mode center_horiz
+    bindsym Shift+v set_mode nocenter_horiz
+    bindsym r set_mode reorder_auto
+    bindsym Shift+r set_mode noreorder_auto
+    bindsym w set_mode fitfraction
+    bindsym Ctrl+w set_mode fitsplit
+    bindsym Shift+w set_mode nofit
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+    bindsym $mod+w mode "default"
+}
+bindsym $mod+w mode "modes"
 
 bindsym $mod+minus scratchpad show
 bindsym $mod+Shift+minus move scratchpad
@@ -133,23 +185,27 @@ bindsym --locked $mod+Shift+BracketLeft exec brightnessctl set 5%-
 bindsym --locked $mod+Shift+BracketRight exec brightnessctl set 5%+
 
 # Screenshot (FN Only)
-bindsym Print exec grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" - | wl-copy
+bindsym Print exec grim -o "$(scrollmsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" - | wl-copy
 bindsym Control+Print exec grim -g "$(slurp)" - | wl-copy
-bindsym Shift+Print exec grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
+bindsym Shift+Print exec grim -o "$(scrollmsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
 bindsym Control+Shift+Print exec grim -g "$(slurp)" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
 
 # Screenshot (Symbols)
-bindsym $mod+Semicolon exec grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" - | wl-copy
+bindsym $mod+Semicolon exec grim -o "$(scrollmsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" - | wl-copy
 bindsym $mod+Control+Semicolon exec grim -g "$(slurp)" - | wl-copy
-bindsym $mod+Shift+Semicolon exec grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
+bindsym $mod+Shift+Semicolon exec grim -o "$(scrollmsg -t get_outputs | jq -r '.[] | select(.focused) | .name')" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
 bindsym $mod+Control+Shift+Semicolon exec grim -g "$(slurp)" ~/Pictures/grim-$(date +%Y%m%d-%H%M%S).png
 
 bar {
     status_command exec /home/brent/.config/wmstatus.sh
     position top
+    mode top
     workspace_min_width 24
     status_padding 2
     strip_workspace_numbers yes
+    trails_indicator no
+    # TODO: submit a pr to allow the user to turn on/off certain indicators, and customize the symbols
+    scroller_indicator yes
 
     colors {
         background #000000
@@ -160,6 +216,8 @@ bar {
         active_workspace #000000 #6c201c #cecdc3
         inactive_workspace #000000 #6c201c #cecdc3
         urgent_workspace #000000 #bc5215 #cecdc3
+
+        scroller #000000 #282726 #cecdc3
     }
 }
 
@@ -171,9 +229,28 @@ client.urgent             #282726 #403e3c #cecdc3 #282726 #282726
 client.placeholder        #282726 #403e3c #cecdc3 #282726 #282726
 client.background         #282726
 
-default_border pixel 4
-hide_edge_borders smart
-gaps inner 0
-smart_gaps on
+animations {
+    enabled yes
+    default yes 150 var 3 [ 0.215 0.61 0.355 1 ]
+    window_open yes 100 var 3 [ 0 0 1 1 ]
+    window_move yes 150 var 3 [ 0.215 0.61 0.355 1 ] off 0.05 6 [0 0.6 0.4 0 1 0 0.4 -0.6 1 -0.6]
+    window_size yes 150 var 3 [ -0.35 0 0 0.5 ]
+    workspace_switch yes 250 var simple [ 0.215 0.61 0.355 1 ]
+    window_fullscreen yes 250 var simple [ 0.3 0.5 0.4 1 ]
+    jump yes 250 var simple [ 0.215 0.61 0.355 1 ]
+    layer_shell yes 150 var 3 [ 0 0 1 1 ]
+    fade_in yes 150 var simple [ 0.32 0 0.67 0 ]
+    fade_out yes 150 var simple [ 0.33 1 0.68 1 ]
+}
 
-include @sysconfdir@/sway/config.d/*
+default_border pixel 4
+gaps inner 8
+gaps outer 8
+
+layout_default_width 0.5
+layout_default_height 1.0
+layout_widths [0.333 0.5 0.667 1.0]
+layout_heights [0.333 0.5 0.667 1.0]
+focus_wrapping no
+
+include @sysconfdir@/scroll/config.d/*

@@ -12,6 +12,7 @@
 
           "i3/config".source   = "${toolboxDirectory}/togohome/.config/i3/config";
           "sway/config".source = "${toolboxDirectory}/togohome/.config/sway/config";
+          "scroll/config".source = "${toolboxDirectory}/togohome/.config/scroll/config";
 
           "dunst".source         = "${toolboxDirectory}/togohome/.config/dunst";
           "foot".source          = "${toolboxDirectory}/togohome/.config/foot";

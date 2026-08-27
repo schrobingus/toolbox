@@ -2,7 +2,7 @@
 
 {
   services = {
-    displayManager.ly.enable = true;
+    # displayManager.ly.enable = true;
     xserver = {
       enable = true;
       displayManager.startx.enable = true;
@@ -13,6 +13,7 @@
 
   environment.systemPackages = with pkgs; [
     picom dunst i3lock i3status dmenu autotiling
+    playerctl scrot
   ];
 
   environment.etc."X11/xinit/xinitrc".text = ''

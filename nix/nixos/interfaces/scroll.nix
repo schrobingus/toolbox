@@ -1,9 +1,10 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   # services.displayManager.ly.enable = true;
-  programs.sway = {
+  programs.scroll = {
     enable = true;
+    package = inputs.scroll.packages.${pkgs.stdenv.hostPlatform.system}.scroll-git;
     wrapperFeatures.gtk = true;
   };
 

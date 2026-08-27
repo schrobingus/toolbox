@@ -1,4 +1,6 @@
 
+# TODO: this is out of date, update this on par with the sway config
+
 # Mod1 = Alt, Mod4 = Super
 set $mod Mod4
 
@@ -8,10 +10,11 @@ font pango:Geist 9
 
 floating_modifier $mod
 
+exec autotiling
+
 exec --no-startup-id "feh --bg-fill $HOME/.config/wallpaper.jpg"
 
 exec_always "xrdb -merge $HOME/.Xresources"
-# exec_always autotiling
 exec picom
 
 # bindsym $mod+Return exec sh -c 'test "$ENABLE_SOFTWARE_RENDERING" = 1 && LIBGL_ALWAYS_SOFTWARE=1 exec ghostty || exec ghostty'
@@ -34,18 +37,28 @@ bindsym $mod+Shift+l move right
 bindsym $mod+v split h
 bindsym $mod+s split v
 
-bindsym $mod+f fullscreen toggle
+bindsym $mod+t layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+w layout stacking
 
-bindsym $mod+Shift+space floating toggle
+bindsym $mod+f floating toggle
+bindsym $mod+Shift+f fullscreen toggle
+bindsym $mod+x focus mode_toggle
+bindsym $mod+a focus parent
 
 bindsym $mod+Control+h workspace prev
 bindsym $mod+Control+l workspace next
+
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
 bindsym $mod+3 workspace 3
 bindsym $mod+4 workspace 4
 bindsym $mod+5 workspace 5
 bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
 
 bindsym $mod+Shift+1 move container to workspace 1
 bindsym $mod+Shift+2 move container to workspace 2
@@ -53,6 +66,10 @@ bindsym $mod+Shift+3 move container to workspace 3
 bindsym $mod+Shift+4 move container to workspace 4
 bindsym $mod+Shift+5 move container to workspace 5
 bindsym $mod+Shift+6 move container to workspace 6
+bindsym $mod+Shift+7 move container to workspace 7
+bindsym $mod+Shift+8 move container to workspace 8
+bindsym $mod+Shift+9 move container to workspace 9
+bindsym $mod+Shift+0 move container to workspace 10
 
 bindsym $mod+BackSpace exec "i3-msg restart"
 
@@ -60,14 +77,53 @@ bindsym Mod1+F4 kill
 bindsym $mod+q kill
 bindsym $mod+Shift+q exec "i3-nagbar -t warning -m 'Really, exit?' -b 'Yes' 'i3-msg exit'"
 
+bindsym $mod+u resize shrink width 8 px or 8 ppt
+bindsym $mod+i resize grow width 8 px or 8 ppt
+bindsym $mod+Shift+u resize shrink height 8 px or 8 ppt
+bindsym $mod+Shift+i resize grow height 8 px or 8 ppt
+
 mode "resize" {
-    bindsym h resize shrink width 5 px or 5 ppt
-    bindsym j resize grow height 5 px or 5 ppt
-    bindsym k resize shrink height 5 px or 5 ppt
-    bindsym l resize grow width 5 px or 5 ppt
+    bindsym h resize shrink width 8 px or 8 ppt
+    bindsym j resize grow height 8 px or 8 ppt
+    bindsym k resize shrink height 8 px or 8 ppt
+    bindsym l resize grow width 8 px or 8 ppt
+    bindsym Escape mode "default"
     bindsym Return mode "default"
+    bindsym $mod+r mode "default"
 }
 bindsym $mod+r mode "resize"
+
+bindsym $mod+minus scratchpad show
+bindsym $mod+Shift+minus move scratchpad
+
+# Volume (FN)
+bindsym XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+
+# Volume (Symbols)
+bindsym $mod+Backslash exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+bindsym $mod+Apostrophe exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+bindsym $mod+BracketLeft exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+bindsym $mod+BracketRight exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+
+# Media (FN Only)
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioPause exec playerctl play-pause
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioStop exec playerctl stop
+
+# Brightness (FN Only)
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+
+# Brightness (Symbols)
+bindsym $mod+Shift+BracketLeft exec brightnessctl set 5%-
+bindsym $mod+Shift+BracketRight exec brightnessctl set 5%+
+
+# TODO: put screenshot bindings here
 
 bar {
     status_command exec /home/brent/.config/wmstatus.sh
@@ -82,8 +138,8 @@ bar {
         separator #000000
 
         focused_workspace #000000 #af3029 #cecdc3
-        active_workspace #000000 #000000 #cecdc3
-        inactive_workspace #000000 #000000 #cecdc3
+        active_workspace #000000 #6c201c #cecdc3
+        inactive_workspace #000000 #6c201c #cecdc3
         urgent_workspace #000000 #bc5215 #cecdc3
     }
 }
@@ -96,8 +152,7 @@ client.urgent             #282726 #403e3c #cecdc3 #282726 #282726
 client.placeholder        #282726 #403e3c #cecdc3 #282726 #282726
 client.background         #282726
 
-for_window [class=".*"] border pixel 4
+default_border pixel 4
 hide_edge_borders smart
-# gaps inner 16
-gaps inner 0
+# gaps inner 0
 # smart_gaps on

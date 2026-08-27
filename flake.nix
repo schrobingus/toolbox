@@ -26,7 +26,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nix-darwin, hjem, ... } @ inputs: let
+  outputs = { self, nixpkgs, nixpkgs-stable, nix-darwin, hjem, scroll, ... } @ inputs: let
     lib = nixpkgs.lib;
 
     mkSystem = { system, builder, baseModule, extraModules ? [], specialArgs ? {} }:
@@ -50,6 +50,7 @@
         system = "x86_64-linux";
         extraModules = [
           hjem.nixosModules.default
+          scroll.nixosModules.default
 
           {
             networking.hostName = "thonk";
@@ -57,7 +58,6 @@
 
           ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/hardware-configuration/x131e-chromebook.nix
-          ./nix/nixos/interfaces/sway.nix
           ./nix/nixos/programs/base-gui.nix
           ./nix/nixos/programs/base-cli.nix
           ./nix/nixos/programs/clankers.nix
@@ -65,6 +65,10 @@
           ./nix/nixos/services/avahi.nix
           ./nix/fonts.nix
           ./nix/hjem.nix
+
+          ./nix/nixos/interfaces/scroll.nix
+          ./nix/nixos/interfaces/sway.nix
+          ./nix/nixos/interfaces/i3.nix
         ];
       };
 
