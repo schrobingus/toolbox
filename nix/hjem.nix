@@ -1,36 +1,47 @@
-{ homeDirectory, toolboxDirectory, ... }:
+{ lib, self, homeDirectory, toolboxDirectory, copyToGoHome, ... }:
 
-{
+let
+  deployToGoHome = lib.mapAttrs (_: value: value // {
+    type = if copyToGoHome then "copy" else "symlink";
+  });
+  src = file:
+    if copyToGoHome
+    then builtins.path { path = "${self}/togohome/${file}"; }
+    else "${toolboxDirectory}/togohome/${file}";
+in {
   hjem = {
     users = {
       brent = {
         user = "brent";
         directory = homeDirectory;
-        xdg.config.files = {
-          "Code/User/settings.json".source     = "${toolboxDirectory}/togohome/.config/Code/User/settings.json";
-          "VSCodium/User/settings.json".source = "${toolboxDirectory}/togohome/.config/Code/User/settings.json";
+        xdg.config.files = deployToGoHome {
+          "Code/User/settings.json".source     = src ".config/Code/User/settings.json";
+          "VSCodium/User/settings.json".source = src ".config/Code/User/settings.json";
 
-          "i3/config".source   = "${toolboxDirectory}/togohome/.config/i3/config";
-          "sway/config".source = "${toolboxDirectory}/togohome/.config/sway/config";
-          "scroll/config".source = "${toolboxDirectory}/togohome/.config/scroll/config";
+          "i3/config".source     = src ".config/i3/config";
+          "sway/config".source   = src ".config/sway/config";
+          "scroll/config".source = src ".config/scroll/config";
 
-          "dunst".source         = "${toolboxDirectory}/togohome/.config/dunst";
-          "foot".source          = "${toolboxDirectory}/togohome/.config/foot";
-          "ghostty".source       = "${toolboxDirectory}/togohome/.config/ghostty";
-          "i3status".source      = "${toolboxDirectory}/togohome/.config/i3status";
-          "picom.conf".source    = "${toolboxDirectory}/togohome/.config/picom.conf";
-          "wallpaper.jpg".source = "${toolboxDirectory}/togohome/.config/wallpaper.jpg";
-          "wmstatus.sh".source   = "${toolboxDirectory}/togohome/.config/wmstatus.sh";
+          "dunst/dunstrc".source   = src ".config/dunst/dunstrc";
+          "foot/foot.ini".source   = src ".config/foot/foot.ini";
+          "ghostty/config".source  = src ".config/ghostty/config";
+          "i3status/config".source = src ".config/i3status/config";
+          "picom.conf".source      = src ".config/picom.conf";
+          "wallpaper.jpg".source   = src ".config/wallpaper.jpg";
+          "wmstatus.sh".source     = src ".config/wmstatus.sh";
+
+          "ghostty/themes/flexoki-dark-bingus".source  = src ".config/ghostty/themes/flexoki-dark-bingus";
+          "ghostty/themes/flexoki-light-bingus".source = src ".config/ghostty/themes/flexoki-light-bingus";
         };
-        files = {
-          ".doom.d/config.el".source   = "${toolboxDirectory}/togohome/.doom.d/config.el";
-          ".doom.d/init.el".source     = "${toolboxDirectory}/togohome/.doom.d/init.el";
-          ".doom.d/packages.el".source = "${toolboxDirectory}/togohome/.doom.d/packages.el";
+        files = deployToGoHome {
+          ".doom.d/config.el".source   = src ".doom.d/config.el";
+          ".doom.d/init.el".source     = src ".doom.d/init.el";
+          ".doom.d/packages.el".source = src ".doom.d/packages.el";
 
-          ".vimrc".source      = "${toolboxDirectory}/togohome/.vimrc";
-          ".ideavimrc".source  = "${toolboxDirectory}/togohome/.ideavimrc";
-          ".Xresources".source = "${toolboxDirectory}/togohome/.Xresources";
-          ".zshrc".source      = "${toolboxDirectory}/togohome/.zshrc";
+          ".vimrc".source      = src ".vimrc";
+          ".ideavimrc".source  = src ".ideavimrc";
+          ".Xresources".source = src ".Xresources";
+          ".zshrc".source      = src ".zshrc";
         };
       };
     };

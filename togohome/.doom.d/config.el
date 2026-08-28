@@ -57,6 +57,7 @@
 (setq dired-kill-when-opening-new-dired-buffer t) ;; Prevent Dired buffers from opening on new directory.
 (pixel-scroll-precision-mode 1) ;; Enable smooth scrolling.
 (+global-word-wrap-mode 1) ;; Enable word wrapping (the Doom way).
+(setq make-cursor-line-fully-visible t) ;; Cursor line must always be visible (don't go under modeline).
 
 ;; Do not highlight lines or display line numbers in anything but `prog-mode'.
 (setq global-hl-line-modes '(prog-mode))

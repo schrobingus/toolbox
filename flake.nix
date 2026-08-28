@@ -29,12 +29,16 @@
   outputs = { self, nixpkgs, nixpkgs-stable, nix-darwin, hjem, scroll, ... } @ inputs: let
     lib = nixpkgs.lib;
 
-    mkSystem = { system, builder, baseModule, extraModules ? [], specialArgs ? {} }:
-      builder {
+    mkSystem = { target, builder, baseModule, specialArgs ? {} }:
+      let
+        inherit (target) system;
+        extraModules = target.extraModules or [];
+        copyToGoHome = target.copyToGoHome or false;
+      in builder {
         inherit system;
 
         specialArgs = {
-          inherit self inputs;
+          inherit self inputs copyToGoHome;
 
           pkgs-stable = import nixpkgs-stable {
             inherit system;
@@ -46,6 +50,31 @@
       };
 
     nixosTargets = {
+      boxed = {
+        system = "aarch64-linux";
+        copyToGoHome = true;
+        extraModules = [
+          hjem.nixosModules.default
+          scroll.nixosModules.default
+          {
+            networking.hostName = "boxed";
+          }
+
+          ./nix/nixos/bootloaders/systemd-boot-efi.nix
+          ./nix/nixos/hardware-configuration/boxed-utm.nix
+          ./nix/nixos/programs/base-gui.nix
+          ./nix/nixos/programs/base-cli.nix
+          ./nix/nixos/programs/devutils.nix
+          ./nix/nixos/services/avahi.nix
+          ./nix/fonts.nix
+          ./nix/hjem.nix
+
+          ./nix/nixos/interfaces/scroll.nix
+          ./nix/nixos/interfaces/sway.nix
+          ./nix/nixos/interfaces/i3.nix
+        ];
+      };
+
       thonk = {
         system = "x86_64-linux";
         extraModules = [
@@ -56,8 +85,8 @@
             networking.hostName = "thonk";
           }
 
-          ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/hardware-configuration/x131e-chromebook.nix
+          ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/programs/base-gui.nix
           ./nix/nixos/programs/base-cli.nix
           ./nix/nixos/programs/clankers.nix
@@ -82,8 +111,8 @@
             services.xserver.xkb.options = "ctrl:swapcaps";
           }
 
-          ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/hardware-configuration/e14-gen2.nix
+          ./nix/nixos/bootloaders/grub-efi.nix
           ./nix/nixos/interfaces/gnome.nix
           ./nix/nixos/programs/base-gui.nix
           ./nix/nixos/programs/base-cli.nix
@@ -111,10 +140,9 @@
 
   in {
     nixosConfigurations = lib.mapAttrs (_: cfg: mkSystem {
-      inherit (cfg) system;
+      target = cfg;
       builder = nixpkgs.lib.nixosSystem;
       baseModule = ./nix/nixos/default.nix;
-      extraModules = cfg.extraModules or [];
       specialArgs = {
         homeDirectory    = "/home/brent";
         toolboxDirectory = "/home/brent/Sources/toolbox";
@@ -122,10 +150,9 @@
     }) nixosTargets;
 
     darwinConfigurations = lib.mapAttrs (_: cfg: mkSystem {
-      inherit (cfg) system;
+      target = cfg;
       builder = nix-darwin.lib.darwinSystem;
       baseModule = ./nix/darwin/default.nix;
-      extraModules = cfg.extraModules or [];
       specialArgs = {
         homeDirectory    = "/Users/brent";
         toolboxDirectory = "/Users/brent/Sources/toolbox";

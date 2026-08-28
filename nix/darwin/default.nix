@@ -18,6 +18,7 @@
     uv ty jupyter marimo
     rustc cargo clippy rust-analyzer
     ghc stack cabal-install haskell-language-server
+    gfortran fortran-language-server
     go gopls
     luajit luarocks
     nodejs
