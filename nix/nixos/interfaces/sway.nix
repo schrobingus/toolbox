@@ -1,14 +1,10 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
-  # services.displayManager.ly.enable = true;
+  imports = [ ../programs-wayland.nix ];
+
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
   };
-
-  environment.systemPackages = with pkgs; [
-    wbg mako wl-clipboard swaylock bemenu autotiling
-    playerctl grim slurp wl-clipboard
-  ];
 }

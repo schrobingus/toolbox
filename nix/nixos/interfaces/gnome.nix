@@ -11,6 +11,8 @@
   environment.gnome.excludePackages = with pkgs; [ gnome-tour gnome-user-docs ];
   environment.systemPackages = (with pkgs; [
     gnome-console gnome-tweaks
+    nautilus celluloid papers
+    morewaita-icon-theme
   ]) ++ (with pkgs.gnomeExtensions; [
     paperwm
     vertical-workspaces # This is V-Shell.

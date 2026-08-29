@@ -60,30 +60,32 @@ let
     then pkgs-stable.emacs30-pgtk
     else pkgs-stable.emacs30;
 
-in emacsPackage.overrideAttrs (oldAttrs: {
-  patches = (oldAttrs.patches or [])
-            ++ (lib.optionals pkgs.stdenv.hostPlatform.isDarwin emacsPlusPatches);
+in {
+  environment.systemPackages = [ (emacsPackage.overrideAttrs (oldAttrs: {
+    patches = (oldAttrs.patches or [])
+              ++ (lib.optionals pkgs.stdenv.hostPlatform.isDarwin emacsPlusPatches);
 
-  configureFlags = (oldAttrs.configureFlags or []) ++ [
-    "--with-native-compilation"    # Enable native compilation for Elisp.
-    "--with-modules"               # Enable dynamic module loading.
-    "--with-tree-sitter"           # Enable Treesitter.
-    "--with-gnutls"                # Enable TLS.
-    "--with-json"                  # Enable the Jansson-powered JSON parser.
-    "--with-rsvg"                  # Enable SVG rendering.
-    "--with-xml2"                  # Enable XML support.
-    "--with-wide-int"              # Enable 64-bit integers no matter what.
-  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-    # NOTE: Doesn't work on Linux, so it's Darwin only. Supposedly reliant on Nixpkgs PR #365784.
-    "--with-xwidgets"              # Enable XWidgets support, including a WebKit buffer.
-  ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-    "--with-cairo"        # Enable Cairo-based drawing by default.
-    "--with-harfbuzz"     # Enable better font rendering with Harfbuzz.
-    "--with-dbus"         # Enact desktop protocols such as notifications.
-    "--with-sound=yes"    # Enable Alsa sound playback.
-  ];
+    configureFlags = (oldAttrs.configureFlags or []) ++ [
+      "--with-native-compilation"    # Enable native compilation for Elisp.
+      "--with-modules"               # Enable dynamic module loading.
+      "--with-tree-sitter"           # Enable Treesitter.
+      "--with-gnutls"                # Enable TLS.
+      "--with-json"                  # Enable the Jansson-powered JSON parser.
+      "--with-rsvg"                  # Enable SVG rendering.
+      "--with-xml2"                  # Enable XML support.
+      "--with-wide-int"              # Enable 64-bit integers no matter what.
+    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+      # NOTE: Doesn't work on Linux, so it's Darwin only. Supposedly reliant on Nixpkgs PR #365784.
+      "--with-xwidgets"              # Enable XWidgets support, including a WebKit buffer.
+    ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      "--with-cairo"        # Enable Cairo-based drawing by default.
+      "--with-harfbuzz"     # Enable better font rendering with Harfbuzz.
+      "--with-dbus"         # Enact desktop protocols such as notifications.
+      "--with-sound=yes"    # Enable Alsa sound playback.
+    ];
 
-  env = (oldAttrs.env or {}) // {
-    NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " " + cflags;
-  };
-})
+    env = (oldAttrs.env or {}) // {
+      NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " " + cflags;
+    };
+  })) ];
+}

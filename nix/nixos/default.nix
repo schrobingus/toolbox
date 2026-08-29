@@ -1,12 +1,7 @@
 { pkgs, ... }:
 
 {
-  # All consistent settings across your devices stay in here.
-  # If something varies, put it in a module.
-
   boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  nixpkgs.config.allowUnfree = true;
 
   # networking.wireless.enable = false;
   networking.networkmanager.enable = true;
@@ -41,26 +36,35 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # jack.enable = true;
-    # media-session.enable = true;
   };
 
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
 
-  # TODO: pass user from flake
   users.users.brent = {
     isNormalUser = true;
     description = "Brent";
     extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
   };
-  programs.zsh.enable = true;
 
   services.openssh = {
     enable = true;
     settings.PermitRootLogin = "yes";
+  };
+
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      domain = true;
+      hinfo = true;
+      userServices = true;
+      workstation = true;
+    };
   };
 
   networking.firewall.enable = true;

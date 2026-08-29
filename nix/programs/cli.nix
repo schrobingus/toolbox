@@ -2,14 +2,18 @@
 
 {
   environment.systemPackages = with pkgs; [
-    btop
-    git vim wget
-    fastfetch ncdu
-    brightnessctl
-    comma
     zsh-history-substring-search
-    nixos-rebuild-ng
-    ripgrep fd
+
+    comma
+    git btop fd ncdu
+    fastfetch ripgrep vim wget
+    pfetch zstd p7zip
+    nix-output-monitor nixos-rebuild-ng
+
+    texliveFull typst
+    pandoc marp-cli
+    yt-dlp
+    exercism
   ];
 
   environment.variables.ZSH_HSS =

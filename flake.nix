@@ -60,18 +60,19 @@
             networking.hostName = "boxed";
           }
 
-          ./nix/nixos/bootloaders/systemd-boot-efi.nix
-          ./nix/nixos/hardware-configuration/boxed-utm.nix
-          ./nix/nixos/programs/base-gui.nix
-          ./nix/nixos/programs/base-cli.nix
-          ./nix/nixos/programs/devutils.nix
-          ./nix/nixos/services/avahi.nix
+          ./nix/default.nix
+          ./nix/programs/cli.nix
+          ./nix/programs/dev.nix
+          ./nix/programs/emacs.nix
           ./nix/fonts.nix
           ./nix/hjem.nix
 
+          ./nix/nixos/bootloaders/systemd-boot-efi.nix
+          ./nix/nixos/hardware-configuration/boxed-utm.nix
+          ./nix/nixos/programs.nix
+
           ./nix/nixos/interfaces/scroll.nix
           ./nix/nixos/interfaces/sway.nix
-          ./nix/nixos/interfaces/i3.nix
         ];
       };
 
@@ -85,15 +86,18 @@
             networking.hostName = "thonk";
           }
 
-          ./nix/nixos/hardware-configuration/x131e-chromebook.nix
-          ./nix/nixos/bootloaders/grub-efi.nix
-          ./nix/nixos/programs/base-gui.nix
-          ./nix/nixos/programs/base-cli.nix
-          ./nix/nixos/programs/clankers.nix
-          ./nix/nixos/programs/devutils.nix
-          ./nix/nixos/services/avahi.nix
+          ./nix/default.nix
+          ./nix/programs/cli.nix
+          ./nix/programs/clankers.nix
+          ./nix/programs/dev.nix
+          ./nix/programs/emacs.nix
+          ./nix/programs/lem.nix
           ./nix/fonts.nix
           ./nix/hjem.nix
+
+          ./nix/nixos/hardware-configuration/x131e-chromebook.nix
+          ./nix/nixos/bootloaders/grub-efi.nix
+          ./nix/nixos/programs.nix
 
           ./nix/nixos/interfaces/scroll.nix
           ./nix/nixos/interfaces/sway.nix
@@ -111,15 +115,19 @@
             services.xserver.xkb.options = "ctrl:swapcaps";
           }
 
-          ./nix/nixos/hardware-configuration/e14-gen2.nix
-          ./nix/nixos/bootloaders/grub-efi.nix
-          ./nix/nixos/interfaces/gnome.nix
-          ./nix/nixos/programs/base-gui.nix
-          ./nix/nixos/programs/base-cli.nix
-          ./nix/nixos/programs/devutils.nix
-          ./nix/nixos/services/avahi.nix
+          ./nix/default.nix
+          ./nix/programs/cli.nix
+          ./nix/programs/dev.nix
+          ./nix/programs/emacs.nix
+          ./nix/programs/lem.nix
           ./nix/fonts.nix
           ./nix/hjem.nix
+
+          ./nix/nixos/hardware-configuration/e14-gen2.nix
+          ./nix/nixos/bootloaders/grub-efi.nix
+          ./nix/nixos/programs.nix
+
+          ./nix/nixos/interfaces/gnome.nix
         ];
       };
     };
@@ -130,10 +138,17 @@
         extraModules = [
           hjem.darwinModules.default
 
-          # ./nix/darwin/homebrew.nix
-          ./nix/darwin/settings.nix
+          ./nix/default.nix
+          ./nix/programs/cli.nix
+          ./nix/programs/clankers.nix
+          ./nix/programs/dev.nix
+          ./nix/programs/emacs.nix
+          ./nix/programs/lem.nix
           ./nix/fonts.nix
           ./nix/hjem.nix
+
+          ./nix/darwin/settings.nix
+          ./nix/darwin/programs.nix
         ];
       };
     };
