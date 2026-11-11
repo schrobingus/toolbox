@@ -70,12 +70,16 @@
 (unpin! doom-themes)
 (package! doom-themes
   :recipe (:host github :repo "schrobingus/doom-themes" :branch "master"))
+;; :recipe (:local-repo "~/Sources/doom-themes-schrobingus"))
 
 ;; Disable Solaire mode (per window highlight).
 (package! solaire-mode :disable t)
 
 ;; Disable Evil Snipe (Avy is used instead).
 (package! evil-snipe :disable t)
+
+;; Install the clanker commander (agent-shell).
+(package! agent-shell)
 
 ;; Install Aggressive Indent mode.
 (package! aggressive-indent)

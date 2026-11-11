@@ -144,14 +144,26 @@
   (map! :n "s" #'evil-avy-goto-char-2-below)
   (map! :n "S" #'evil-avy-goto-char-2-above))
 
-;; Enable Aggressive Indent Mode, and turn off Electric Indent Mode.
+;; Configure and enable the clanker commander.
+(use-package! agent-shell
+  :config
+  (map! :map agent-shell-mode-map
+        :i "RET" #'newline
+        :n "RET" #'comint-send-input)
+  (add-hook 'diff-mode-hook
+            (lambda ()
+              (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
+                (evil-emacs-state)))))
+
+;; Configure and enable Aggressive Indent Mode, and disable Electric Indent Mode.
 (use-package! aggressive-indent
   :config
   (add-to-list 'aggressive-indent-protected-commands 'evil-undo)
+  (add-to-list 'aggressive-indent-excluded-modes 'f90-mode) ;; Cursor jumping occurs in Fortran specifically.
   (electric-indent-mode 0)
   (global-aggressive-indent-mode 1))
 
-;; TODO: consider configuring dirvish
+;; NOTE: consider configuring dirvish
 
 ;; Set frame settings (line spacing + window margins).
 (use-package! frame
